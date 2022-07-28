@@ -2,6 +2,49 @@
 
 An unofficial [Tailwind](https://tailwindcss.com/) plugin attempting to ease fluid layout implementation.
 
+## Installation
+
+```bash
+npm i -D @numbered/tailwind-fluid-layout-system
+```
+
+Then import the plugin to your `tailwind.config.js`, add configure it.
+
+```js
+const fls = require('@numbered/tailwind-fluid-layout-system')
+
+module.exports = {
+  theme: {
+    grid: {
+      mobile: {
+        columns: 10,
+        gutter: 0.1,
+        margin: 20,
+        mockupWidth: 375
+      },
+      tablet: {
+        columns: 10,
+        gutter: 0.1,
+        margin: 30,
+        mockupWidth: 768,
+        screen: 'md'
+      },
+      desktop: {
+        columns: 12,
+        gutter: 0.1,
+        margin: 60,
+        mockupWidth: 1440,
+        maxWidth: 1920,
+        screen: 'lg'
+      }
+    }
+  },
+  plugins: [fls({
+    color: 'red',
+    enabled: process.env.NODE_ENV === 'development'
+  })]
+}
+```
 
 ## Motivation
 
@@ -17,10 +60,6 @@ This plugins add some utility classes to manage a simple grid system with option
 ---
 
 ## Documentation
-
-### Setup
-
-// TODO
 
 ### Components
 
