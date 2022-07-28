@@ -1,0 +1,34 @@
+<span className="lead">
+  This plugin attempts to simplify fluid grid system implementation with deeply nested elements.
+</span>
+
+## Columns
+<div className="flex flex-col text-black text-sm text-center">
+	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-1">span-w-1</div>
+	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2">span-w-2</div>
+	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-3">span-w-3</div>
+</div>
+
+## Gutters
+
+### Gutter
+
+<div className="flex text-black text-sm text-center">
+	<div className="bg-red-300 flex justify-center items-center h-20 span-ml-1 gutter-w-1"></div>
+</div>
+
+### With span
+You can use wide to add one gutter to span, and wider to add two gutters.
+
+<div className="flex flex-col text-black text-sm text-center">
+	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2">span-w-2</div>
+	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2-wide">span-w-2-wide</div>
+	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2-wider">span-w-2-wider</div>
+</div>
+
+### Spans & gutters
+<div className="flex text-black text-sm text-center">
+	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2">span-w-1</div>
+	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2 gutter-ml-1">span-w-1<br/>gutter-ml-1</div>
+	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2 span-ml-1-wider">span-w-1<br/>span-ml-1-wider</div>
+</div>
