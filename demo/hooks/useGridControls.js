@@ -27,6 +27,8 @@ const useGridControls = () => {
       localStorage.setItem('guidelinesVisibility', 'inherit')
     }
 
+    document.body.style.setProperty('--guidelines-visibility', localStorage.getItem('guidelinesVisibility'))
+
     window.addEventListener('keypress', handleKeypress)
     window.addEventListener('keyup', handleKeyup)
 
@@ -34,7 +36,7 @@ const useGridControls = () => {
       window.removeEventListener('keypress', handleKeypress)
       window.removeEventListener('keyup', handleKeyup)
     }
-  })
+  }, [])
 }
 
 export default useGridControls
