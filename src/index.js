@@ -129,7 +129,8 @@ const guidelines = (grids, screens, color = 'red') => {
         transform: 'translateX(-50%)',
         'pointer-events': 'none',
         background: guideline(grids.mobile, color),
-        'max-width': 'calc(var(--max-width) - var(--sbw))'
+        'max-width': 'calc(var(--max-width) - var(--sbw))',
+        visibility: 'var(--guidelines-visibility, "inherit")'
       }
     }
   }
@@ -277,7 +278,7 @@ const grid = plugin.withOptions(
 
       // guidelines
 
-      if (options?.enabled || (options?.enabled === undefined && process.env.NODE_ENV === 'development')) {
+      if (options?.guidelines || (options?.guidelines === undefined && process.env.NODE_ENV === 'development')) {
         addBase(guidelines(grids, theme('screens'), options?.color || 'red'))
       }
     }
