@@ -1,6 +1,6 @@
 const plugin = require('tailwindcss/plugin')
 
-const prefixes = {
+const utilities = {
   w: 'width',
   'w-min': 'min-width',
   'w-max': 'max-width',
@@ -128,8 +128,7 @@ const guidelines = (grids, screens, color = 'red') => {
         transform: 'translateX(-50%)',
         'pointer-events': 'none',
         background: guideline(grids.mobile, color),
-        'max-width': 'calc(var(--max-width) - var(--sbw))',
-        opacity: 0.6
+        'max-width': 'calc(var(--max-width) - var(--sbw))'
       }
     }
   }
@@ -158,12 +157,12 @@ const parseScreen = screen => {
 }
 
 const matchUtilitiesFor = (key, fn, matchUtilities, values) => {
-  for (const prefix in prefixes) {
-    const element = prefixes[prefix]
+  for (const utility in utilities) {
+    const element = utilities[utility]
 
     matchUtilities(
       {
-        [`${key}-${prefix}`]: value => {
+        [`${key}-${utility}`]: value => {
           return Array.isArray(element)
             ? element.reduce((result, item) => {
                 result[item] = `${fn(value)}`

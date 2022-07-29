@@ -1,3 +1,5 @@
+const fls = require('../src/index.js')
+
 module.exports = {
   content: ['./demo/pages/**/*.{js,mdx}', './demo/components/**/*.{js,mdx}'],
   transform: {
@@ -29,5 +31,5 @@ module.exports = {
     }
   },
   variants: {},
-  plugins: [require('@tailwindcss/typography'), require('../src/index.js')]
+  plugins: [require('@tailwindcss/typography'), fls({ color: 'rgba(255,0,0,0.6)' })]
 }
