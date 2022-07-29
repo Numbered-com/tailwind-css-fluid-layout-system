@@ -20,7 +20,8 @@ const utilities = {
   mt: 'margin-top',
   mr: 'margin-right',
   mb: 'margin-bottom',
-  ml: 'margin-left'
+  ml: 'margin-left',
+  gap: 'gap'
 }
 
 const toRem = value => {
