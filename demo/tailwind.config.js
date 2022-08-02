@@ -31,5 +31,11 @@ module.exports = {
     }
   },
   variants: {},
-  plugins: [require('@tailwindcss/typography'), fls({ color: 'rgba(255,0,0,0.6)' })]
+  plugins: [
+    require('@tailwindcss/typography'),
+    fls({
+      color: 'rgba(255,0,0,0.6)',
+      guidelines: true // force enable guidelines on production env
+    })
+  ]
 }

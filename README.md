@@ -52,6 +52,7 @@ While [CSS grid layout](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Gri
 
 This plugins add some utility classes to manage a simple grid system with optional gutters.
 
+👉 [Demo](https://tailwind-fls.vercel.app/)
 
 ## How it works
 
