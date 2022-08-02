@@ -25,7 +25,7 @@ export default function Index() {
 
           <div>
             <a
-              href='https://github.com/tailwindcss/typography'
+              href='https://www.npmjs.com/package/@numbered/tailwind-fluid-layout-system'
               className='inline-flex items-center py-2 px-3 space-x-2 rounded-md bg-gray-800 text-gray-300 text-sm leading-5 font-medium shadow-lg hover:bg-gray-700 transition ease-in-out duration-100'>
               <svg className='h-5 w-5 text-white' fill='currentColor' viewBox='0 0 20 20'>
                 <path
