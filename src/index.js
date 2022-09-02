@@ -21,7 +21,9 @@ const utilities = {
   mr: 'margin-right',
   mb: 'margin-bottom',
   ml: 'margin-left',
-  gap: 'gap'
+  gap: 'gap',
+  'gap-x': 'column-gap',
+  'gap-y': 'row-gap'
 }
 
 const toRem = value => {
@@ -132,7 +134,6 @@ const guidelines = (grids, screens, color = 'red') => {
         transform: 'translateX(-50%)',
         'pointer-events': 'none',
         background: guideline(grids.mobile, color),
-        // 'max-width': 'calc(var(--max-width) - var(--sbw))',
         visibility: 'var(--guidelines-visibility, "inherit")'
       }
     }

@@ -3,6 +3,9 @@
 </span>
 
 ## Columns
+
+Use the <code>span</code> utility to set the column number.
+
 <div className="flex flex-col text-black text-sm text-center">
 	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-1">span-w-1</div>
 	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2">span-w-2</div>
@@ -18,7 +21,8 @@
 </div>
 
 ### With span
-You can use wide to add one gutter to span, and wider to add two gutters.
+
+You can use <code>wide</code> to add one gutter to span, and <code>wider</code> to add two gutters.
 
 <div className="flex flex-col text-black text-sm text-center">
 	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2">span-w-2</div>
@@ -27,8 +31,19 @@ You can use wide to add one gutter to span, and wider to add two gutters.
 </div>
 
 ### Spans & gutters
+
+Container with <code>gutter-gap-1</code> class.
+
+<div className="flex text-black text-sm text-center gutter-gap-1">
+	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2">span-w-2</div>
+	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2">span-w-2</div>
+	<div className="bg-red-300 flex justify-center items-center h-20 span-w-3">span-w-3</div>
+</div>
+
+Manual spacing.
+
 <div className="flex text-black text-sm text-center">
-	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2">span-w-1</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2 gutter-ml-1">span-w-1<br/>gutter-ml-1</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2 span-ml-1-wider">span-w-1<br/>span-ml-1-wider</div>
+	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2">span-w-2</div>
+	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2 gutter-ml-1">span-w-2<br/>gutter-ml-1</div>
+	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2 span-ml-1-wider">span-w-2<br/>span-ml-1-wider</div>
 </div>
