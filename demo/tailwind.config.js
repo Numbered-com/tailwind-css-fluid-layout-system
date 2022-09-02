@@ -8,13 +8,14 @@ module.exports = {
   theme: {
     grid: {
       mobile: {
-        columns: 10,
+        columns: 6,
         gutter: 0.1,
         margin: 20,
-        mockupWidth: 375
+        mockupWidth: 375,
+        fontScalingMaxWidth: 500
       },
       tablet: {
-        columns: 10,
+        columns: 6,
         gutter: 0.1,
         margin: 30,
         mockupWidth: 768,
@@ -25,7 +26,8 @@ module.exports = {
         gutter: 0.1,
         margin: 60,
         mockupWidth: 1440,
-        maxWidth: 1920,
+        maxWidth: 1680,
+        fontScalingMaxWidth: 1540,
         screen: 'lg'
       }
     }
