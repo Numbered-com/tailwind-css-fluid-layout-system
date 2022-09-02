@@ -31,7 +31,8 @@ const toRem = value => {
 // -----------------------------------------------------o spans & gutters
 
 /**
- * converts a column count to rem in a grid context
+ * Span
+ * @return matching amount of columns including gutters
  * @param col n | n-wide | n-wider
  * @param grid
  */
@@ -61,7 +62,8 @@ const span = (col = 1, grid = null) => {
 }
 
 /**
- * converts a gutter to rem in a grid context
+ * Gutter
+ * @return matching amount of gutters
  * @param count n
  * @param grid
  */
@@ -70,7 +72,8 @@ const gutter = (count = 1, grid = null) => {
 }
 
 /**
- * return the margin in rem
+ * Margin
+ * @return matching amount of margins
  * @param count n
  * @param grid
  */
@@ -129,7 +132,7 @@ const guidelines = (grids, screens, color = 'red') => {
         transform: 'translateX(-50%)',
         'pointer-events': 'none',
         background: guideline(grids.mobile, color),
-        'max-width': 'calc(var(--max-width) - var(--sbw))',
+        // 'max-width': 'calc(var(--max-width) - var(--sbw))',
         visibility: 'var(--guidelines-visibility, "inherit")'
       }
     }
@@ -204,17 +207,30 @@ const grid = plugin.withOptions(
           }
         })
 
-        const vw = (100 * 16) / grid.mockupWidth
-        const gridWidth = grid.mockupWidth - 2 * grid.margin
+        const vw = 100 / grid.mockupWidth
+
+        const margin = grid.margin
+        const fluidMargin = margin * vw
+
+        const gridWidth = grid.mockupWidth - 2 * margin
+        const fluidGridWidth = gridWidth * vw
+
         const gutter = (gridWidth * grid.gutter) / grid.columns
+        const fluidGutter = gutter * vw
+
+        const column = (gridWidth - (grid.columns - 1) * gutter) / grid.columns
+        const fluidColumn = column * vw
+
+        const fontSize = `calc(${vw * 16}vw - var(--sbw) * ${16 / grid.mockupWidth})`
+        const fontMaxWidth = grid.fontScalingMaxWidth || grid.maxWidth
+        const maxFontSize = fontMaxWidth ? `min(${fontSize}, ${(16 * fontMaxWidth) / grid.mockupWidth}px)` : null
 
         const vars = {
-          '--grid-width': `${toRem(gridWidth).toFixed(3)}rem`,
-          '--max-width': grid.maxWidth ? `${grid.maxWidth}px` : null,
-          '--margin': `${toRem(grid.margin).toFixed(3)}rem`,
-          '--gutter': `${toRem(gutter).toFixed(3)}rem`,
-          '--column': `${toRem((gridWidth - (grid.columns - 1) * gutter) / grid.columns).toFixed(3)}rem`,
-          fontSize: `calc(${vw}vw - var(--sbw) * ${16 / grid.mockupWidth})`
+          '--grid-width': `calc(${fluidGridWidth}vw - var(--sbw))`,
+          '--margin': `${fluidMargin}vw`,
+          '--gutter': `calc(${fluidGutter}vw - var(--sbw) * ${fluidGutter / 100})`,
+          '--column': `calc(${fluidColumn}vw - var(--sbw) * ${fluidColumn / 100})`,
+          fontSize: maxFontSize || fontSize
         }
 
         if (mediaQuery) {
@@ -223,26 +239,28 @@ const grid = plugin.withOptions(
               [mediaQuery]: vars
             }
           })
-          if (grid.maxWidth) {
-            addBase({
-              html: {
-                [mediaQuery]: {
-                  fontSize: `min(calc(${vw}vw - var(--sbw) * ${16 / grid.mockupWidth}), ${(16 * grid.maxWidth) / grid.mockupWidth}px)`
-                }
-              }
-            })
-          }
         } else {
           addBase({
             html: vars
           })
-          if (grid.maxWidth) {
-            addBase({
-              html: {
-                fontSize: `min(calc(${vw}vw - var(--sbw) * ${16 / grid.mockupWidth}), ${(16 * grid.maxWidth) / grid.mockupWidth}px)`
+        }
+
+        if (grid.maxWidth) {
+          const maxMargin = (margin * grid.maxWidth) / grid.mockupWidth
+          const maxGridWidth = grid.maxWidth - 2 * maxMargin
+          const maxGutter = (maxGridWidth * grid.gutter) / grid.columns
+          const maxColumn = (maxGridWidth - (grid.columns - 1) * maxGutter) / grid.columns
+
+          addBase({
+            html: {
+              [`@media (min-width: ${grid.maxWidth}px)`]: {
+                '--grid-width': `${maxGridWidth}px`,
+                '--margin': `${maxMargin}px`,
+                '--gutter': `${maxGutter}px`,
+                '--column': `${maxColumn}px`
               }
-            })
-          }
+            }
+          })
         }
       }
 
