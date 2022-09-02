@@ -35,6 +35,7 @@ module.exports = {
         margin: 60,
         mockupWidth: 1440,
         maxWidth: 1920,
+        fontScalingMaxWidth: 1540,
         screen: 'lg'
       }
     }
@@ -111,6 +112,7 @@ Available utilities:
 | span-mr-{size}-{?wide\|wider}
 | span-mb-{size}-{?wide\|wider}
 | span-ml-{size}-{?wide\|wider}
+| span-gap-{size}-{?wide\|wider}
 
 #### Gutter
 
@@ -144,6 +146,7 @@ Available utilities:
 | gutter-mr-{size}
 | gutter-mb-{size}
 | gutter-ml-{size}
+| gutter-gap-{size}
 
 #### Margin
 
@@ -177,3 +180,4 @@ Available utilities:
 | margin-mr-{size}
 | margin-mb-{size}
 | margin-ml-{size}
+| margin-gap-{size}
