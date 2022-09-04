@@ -222,15 +222,15 @@ const grid = plugin.withOptions(
         const column = (gridWidth - (grid.columns - 1) * gutter) / grid.columns
         const fluidColumn = column * vw
 
-        const fontSize = `calc(${vw * 16}vw - var(--sbw) * ${16 / grid.mockupWidth})`
+        const fontSize = `calc(${(vw * 16).toFixed(3)}vw - var(--sbw) * ${(16 / grid.mockupWidth).toFixed(3)})`
         const fontMaxWidth = grid.fontScalingMaxWidth || grid.maxWidth
-        const maxFontSize = fontMaxWidth ? `min(${fontSize}, ${(16 * fontMaxWidth) / grid.mockupWidth}px)` : null
+        const maxFontSize = fontMaxWidth ? `min(${fontSize}, ${((16 * fontMaxWidth) / grid.mockupWidth).toFixed(2)}px)` : null
 
         const vars = {
-          '--grid-width': `calc(${fluidGridWidth}vw - var(--sbw))`,
-          '--margin': `${fluidMargin}vw`,
-          '--gutter': `calc(${fluidGutter}vw - var(--sbw) * ${fluidGutter / 100})`,
-          '--column': `calc(${fluidColumn}vw - var(--sbw) * ${fluidColumn / 100})`,
+          '--grid-width': `calc(${fluidGridWidth.toFixed(3)}vw - var(--sbw))`,
+          '--margin': `${fluidMargin.toFixed(3)}vw`,
+          '--gutter': `calc(${fluidGutter.toFixed(3)}vw - var(--sbw) * ${(fluidGutter / 100).toFixed(4)})`,
+          '--column': `calc(${fluidColumn.toFixed(3)}vw - var(--sbw) * ${(fluidColumn / 100).toFixed(4)})`,
           fontSize: maxFontSize || fontSize
         }
 
@@ -255,10 +255,10 @@ const grid = plugin.withOptions(
           addBase({
             html: {
               [`@media (min-width: ${grid.maxWidth}px)`]: {
-                '--grid-width': `${maxGridWidth}px`,
-                '--margin': `${maxMargin}px`,
-                '--gutter': `${maxGutter}px`,
-                '--column': `${maxColumn}px`
+                '--grid-width': `${maxGridWidth.toFixed(3)}px`,
+                '--margin': `${maxMargin.toFixed(3)}px`,
+                '--gutter': `${maxGutter.toFixed(3)}px`,
+                '--column': `${maxColumn.toFixed(3)}px`
               }
             }
           })
