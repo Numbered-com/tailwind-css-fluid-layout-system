@@ -21,6 +21,13 @@ const utilities = {
   mr: 'margin-right',
   mb: 'margin-bottom',
   ml: 'margin-left',
+  inset: ['top', 'right', 'bottom', 'left'],
+  'inset-x': ['right', 'left'],
+  'inset-y': ['top', 'bottom'],
+  top: 'top',
+  right: 'right',
+  bottom: 'bottom',
+  left: 'left',
   gap: 'gap',
   'gap-x': 'column-gap',
   'gap-y': 'row-gap'
