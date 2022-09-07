@@ -2,11 +2,11 @@ const plugin = require('tailwindcss/plugin')
 
 const utilities = {
   w: 'width',
-  'w-min': 'min-width',
-  'w-max': 'max-width',
+  'min-w': 'min-width',
+  'max-w': 'max-width',
   h: 'height',
-  'h-min': 'min-height',
-  'h-max': 'max-height',
+  'min-h': 'min-height',
+  'max-h': 'max-height',
   p: 'padding',
   px: ['padding-left', 'padding-right'],
   py: ['padding-top', 'padding-bottom'],
