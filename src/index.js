@@ -234,10 +234,10 @@ const grid = plugin.withOptions(
         const maxFontSize = fontMaxWidth ? `min(${fontSize}, ${((16 * fontMaxWidth) / grid.mockupWidth).toFixed(2)}px)` : null
 
         const vars = {
-          '--grid-width': `calc(${fluidGridWidth.toFixed(3)}vw - var(--sbw))`,
-          '--margin': `${fluidMargin.toFixed(3)}vw`,
-          '--gutter': `calc(${fluidGutter.toFixed(3)}vw - var(--sbw) * ${(fluidGutter / 100).toFixed(4)})`,
-          '--column': `calc(${fluidColumn.toFixed(3)}vw - var(--sbw) * ${(fluidColumn / 100).toFixed(4)})`,
+          '--grid-width': `calc(${fluidGridWidth.toFixed(3)}vw - var(--sbw) * ${(fluidGridWidth / 100).toFixed(3)})`,
+          '--margin': `calc(${fluidMargin.toFixed(3)}vw - var(--sbw) * ${(fluidMargin / 100).toFixed(3)})`,
+          '--gutter': `calc(${fluidGutter.toFixed(3)}vw - var(--sbw) * ${(fluidGutter / 100).toFixed(3)})`,
+          '--column': `calc(${fluidColumn.toFixed(3)}vw - var(--sbw) * ${(fluidColumn / 100).toFixed(3)})`,
           fontSize: maxFontSize || fontSize
         }
 
