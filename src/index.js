@@ -66,7 +66,7 @@ const span = (col = 1, grid = null) => {
     return count * column + (count - 1) * gutter + spreading
   } else {
     const spreading = spreadingInstruction === 'wide' ? 1 : spreadingInstruction === 'wider' ? 2 : 0
-    return `calc(${count} * var(--column) + ${count - 1 * Math.sign(count) + spreading} * var(--gutter))`
+    return `calc(${count} * var(--column) + ${count - (1 - spreading) * Math.sign(count)} * var(--gutter))`
   }
 }
 
