@@ -30,7 +30,8 @@ const utilities = {
   left: 'left',
   gap: 'gap',
   'gap-x': 'column-gap',
-  'gap-y': 'row-gap'
+  'gap-y': 'row-gap',
+  indent: 'indent'
 }
 
 const toRem = value => {
