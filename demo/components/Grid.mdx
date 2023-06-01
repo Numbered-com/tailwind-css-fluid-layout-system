@@ -4,7 +4,7 @@
 
 ## Columns
 
-Use the <code>span</code> utility to set the column number.
+Use the <code>span</code> utility to set the column count with a sizing prop.
 
 <div className="flex flex-col text-black text-sm text-center">
 	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-1">span-w-1</div>
@@ -16,13 +16,15 @@ Use the <code>span</code> utility to set the column number.
 
 ### Gutter
 
+Use the <code>gutter</code> utility to set the gutter count with a sizing prop.
+
 <div className="flex text-black text-sm text-center">
 	<div className="bg-red-300 flex justify-center items-center h-20 span-ml-1 gutter-w-1"></div>
 </div>
 
 ### With span
 
-You can use <code>wide</code> to add one gutter to span, and <code>wider</code> to add two gutters.
+You can use <code>wide</code> suffix to add one gutter to span, and <code>wider</code> to add two gutters.
 
 <div className="flex flex-col text-black text-sm text-center">
 	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2">span-w-2</div>
@@ -46,4 +48,13 @@ Manual spacing.
 	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2">span-w-2</div>
 	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2 gutter-ml-1">span-w-2<br/>gutter-ml-1</div>
 	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2 span-ml-1-wider">span-w-2<br/>span-ml-1-wider</div>
+</div>
+
+
+### Margin
+
+Use the <code>margin</code> utility to get outter margins if needed.
+
+<div className="flex text-black text-sm text-center h-20 relative">
+	<div className="bg-red-300 flex justify-center items-center h-20 span-mr-2-wide margin-w-1 absolute right-full">margin-w-1</div>
 </div>
