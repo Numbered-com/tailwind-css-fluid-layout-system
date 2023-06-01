@@ -34,10 +34,6 @@ const utilities = {
   indent: 'indent'
 }
 
-const toRem = value => {
-  return value / 16
-}
-
 // -----------------------------------------------------o spans & gutters
 
 /**
@@ -200,6 +196,7 @@ const grid = plugin.withOptions(
 
       for (const key in grids) {
         const grid = grids[key]
+
         grid.gutter = grid.gutter || 0
         grid.margin = grid.margin || 0
 
@@ -224,7 +221,9 @@ const grid = plugin.withOptions(
         const gridWidth = grid.mockupWidth - 2 * margin
         const fluidGridWidth = gridWidth * vw
 
-        const gutter = (gridWidth * grid.gutter) / grid.columns
+        const gutter = grid.gutter < 1 ? (gridWidth * grid.gutter) / grid.columns : grid.gutter
+
+        if (grid.gutter >= 1) grid.gutter = (grid.columns * gutter) / gridWidth
         const fluidGutter = gutter * vw
 
         const column = (gridWidth - (grid.columns - 1) * gutter) / grid.columns

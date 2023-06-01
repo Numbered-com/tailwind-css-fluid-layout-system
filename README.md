@@ -18,22 +18,22 @@ module.exports = {
     grid: {
       mobile: {
         columns: 10,
-        gutter: 0.1,
-        margin: 20,
-        mockupWidth: 375
+        mockupWidth: 375,
+        gutter: 10,
+        margin: 20
       },
       tablet: {
         columns: 10,
-        gutter: 0.1,
-        margin: 30,
         mockupWidth: 768,
+        gutter: 10,
+        margin: 30,
         screen: 'md'
       },
       desktop: {
         columns: 12,
-        gutter: 0.1,
-        margin: 60,
         mockupWidth: 1440,
+        gutter: 20,
+        margin: 60,
         maxWidth: 1920,
         fontScalingMaxWidth: 1540,
         screen: 'lg'
@@ -53,17 +53,11 @@ While [CSS grid layout](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Gri
 
 This plugins add some utility classes to manage a simple grid system with optional gutters.
 
-👉 [Demo](https://tailwind-fls.vercel.app/)
-
-## How it works
-
-// TODO
+👉 [Demo](https://tailwind-fls.numbered.studio)
 
 ---
 
 ## Documentation
-
-### Components
 
 ### Grid container
 

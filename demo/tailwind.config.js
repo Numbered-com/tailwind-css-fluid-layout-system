@@ -10,20 +10,20 @@ module.exports = {
       mobile: {
         columns: 6,
         gutter: 0.1,
-        margin: 20,
+        margin: 10,
         mockupWidth: 375,
         fontScalingMaxWidth: 500
       },
       tablet: {
         columns: 6,
-        gutter: 0.1,
+        gutter: 10,
         margin: 30,
         mockupWidth: 768,
         screen: 'md'
       },
       desktop: {
         columns: 12,
-        gutter: 0.1,
+        gutter: 10,
         margin: 60,
         mockupWidth: 1440,
         maxWidth: 1680,
