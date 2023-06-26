@@ -31,7 +31,14 @@ const utilities = {
   gap: 'gap',
   'gap-x': 'column-gap',
   'gap-y': 'row-gap',
-  indent: 'indent'
+  indent: 'indent',
+  border: 'border-width',
+  'border-t': 'border-top-width',
+  'border-r': 'border-right-width',
+  'border-b': 'border-bottom-width',
+  'border-l': 'border-left-width',
+  'border-x': ['border-left-width', 'border-right-width'],
+  'border-y': ['border-top-width', 'border-bottom-width']
 }
 
 // -----------------------------------------------------o spans & gutters
