@@ -7,10 +7,7 @@
 		"src/*.js",
 		"dist/"
 	],
-	"repository": {
-		"type": "git",
-		"url": "git+https://gitlab.com/numbered/npm/tailwind-css-fluid-layout-system.git"
-	},
+	"repository": "https://gitlab.com/numbered/npm/tailwind-css-fluid-layout-system",
 	"license": "MIT",
 	"publishConfig": {
 		"access": "public"
