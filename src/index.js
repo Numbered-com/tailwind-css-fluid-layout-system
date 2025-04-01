@@ -105,7 +105,8 @@ const gridContainer = () => {
   return {
     '.grid-container': {
       display: 'block',
-      margin: '0 auto',
+      marginLeft: 'auto',
+      marginRight: 'auto',
       width: 'var(--grid-width)'
     },
     '.grid-container-full': {
