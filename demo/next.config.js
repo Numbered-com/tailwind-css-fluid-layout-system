@@ -1,6 +1,11 @@
-const withMDX = require('@next/mdx')()
+import createMDX from '@next/mdx'
 
-module.exports = withMDX({
-  swcMinify: true,
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   pageExtensions: ['js', 'jsx', 'md', 'mdx'],
+}
+
+const withMDX = createMDX({
 })
+
+export default withMDX(nextConfig)
