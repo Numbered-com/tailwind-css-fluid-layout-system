@@ -223,12 +223,6 @@ const grid = plugin.withOptions(
 
         // base
 
-        addBase({
-          [container]: {
-            '--sbw': options?.sbwInit || '0px'
-          }
-        })
-
         const vw = 100 / grid.mockupWidth
 
         const margin = grid.margin
@@ -253,19 +247,36 @@ const grid = plugin.withOptions(
           '--grid-width': `calc(${fluidGridWidth.toFixed(5)}vw - var(--sbw) * ${(fluidGridWidth / 100).toFixed(5)})`,
           '--margin': `calc(${fluidMargin.toFixed(5)}vw - var(--sbw) * ${(fluidMargin / 100).toFixed(5)})`,
           '--gutter': `calc(${fluidGutter.toFixed(5)}vw - var(--sbw) * ${(fluidGutter / 100).toFixed(5)})`,
-          '--column': `calc(${fluidColumn.toFixed(5)}vw - var(--sbw) * ${(fluidColumn / 100).toFixed(5)})`,
-          fontSize: maxFontSize || fontSize
+          '--column': `calc(${fluidColumn.toFixed(5)}vw - var(--sbw) * ${(fluidColumn / 100).toFixed(5)})`
         }
+
+        addBase({
+          html: {
+            '--sbw': '0px',
+            '@supports (container-type: inline-size)': {
+              'container-type': 'inline-size',
+              '--sbw': 'calc(100vw - 100cqw)'
+            },
+            fontSize: maxFontSize || fontSize
+            // '&::before': {
+            //   content: 'counter(val) "px"',
+            //   counterReset: 'val tan(atan2(var(--sbw), 1px))',
+            //   position: 'fixed',
+            //   color: 'red',
+            //   'z-index': 10000
+            // }
+          }
+        })
 
         if (mediaQuery) {
           addBase({
-            [container]: {
+            html: {
               [mediaQuery]: vars
             }
           })
         } else {
           addBase({
-            [container]: vars
+            html: vars
           })
         }
 
@@ -276,7 +287,7 @@ const grid = plugin.withOptions(
           const maxColumn = (maxGridWidth - (grid.columns - 1) * maxGutter) / grid.columns
 
           addBase({
-            [container]: {
+            html: {
               [`@media (min-width: ${grid.maxWidth}px)`]: {
                 '--grid-width': `${maxGridWidth.toFixed(5)}px`,
                 '--margin': `${maxMargin.toFixed(5)}px`,
