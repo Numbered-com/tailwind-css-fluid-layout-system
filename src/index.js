@@ -206,6 +206,8 @@ const grid = plugin.withOptions(
     return props => {
       const { matchUtilities, addBase, addComponents, theme } = props
 
+      const container = options?.cssContainer || 'html'
+
       const grids = theme('grid')
       if (grids.mobile === undefined) throw new Error(`grid.mobile is the default and cannot be undefined`)
 
@@ -217,14 +219,13 @@ const grid = plugin.withOptions(
 
         if (grid.columns === undefined) throw new Error(`columns is required for ${key}`)
         if (grid.mockupWidth === undefined) throw new Error(`mockupWidth is required for ${key}`)
-
         const mediaQuery = grid.screen ? parseScreen(theme('screens')[grid.screen]) : null
 
         // base
 
         addBase({
-          html: {
-            '--sbw': '0px'
+          [container]: {
+            '--sbw': options?.sbwInit || '0px'
           }
         })
 
@@ -258,13 +259,13 @@ const grid = plugin.withOptions(
 
         if (mediaQuery) {
           addBase({
-            html: {
+            [container]: {
               [mediaQuery]: vars
             }
           })
         } else {
           addBase({
-            html: vars
+            [container]: vars
           })
         }
 
@@ -275,7 +276,7 @@ const grid = plugin.withOptions(
           const maxColumn = (maxGridWidth - (grid.columns - 1) * maxGutter) / grid.columns
 
           addBase({
-            html: {
+            [container]: {
               [`@media (min-width: ${grid.maxWidth}px)`]: {
                 '--grid-width': `${maxGridWidth.toFixed(5)}px`,
                 '--margin': `${maxMargin.toFixed(5)}px`,

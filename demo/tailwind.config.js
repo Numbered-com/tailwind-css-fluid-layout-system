@@ -37,6 +37,8 @@ module.exports = {
     require('@tailwindcss/typography'),
     fls({
       color: 'rgba(255,0,0,0.6)',
+      cssContainer: 'body',
+      sbwInit: 'calc(100vw - 100cqw)',
       guidelines: true // force enable guidelines on production env
     })
   ]
