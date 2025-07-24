@@ -206,8 +206,6 @@ const grid = plugin.withOptions(
     return props => {
       const { matchUtilities, addBase, addComponents, theme } = props
 
-      const container = options?.cssContainer || 'html'
-
       const grids = theme('grid')
       if (grids.mobile === undefined) throw new Error(`grid.mobile is the default and cannot be undefined`)
 
@@ -247,7 +245,8 @@ const grid = plugin.withOptions(
           '--grid-width': `calc(${fluidGridWidth.toFixed(5)}vw - var(--sbw) * ${(fluidGridWidth / 100).toFixed(5)})`,
           '--margin': `calc(${fluidMargin.toFixed(5)}vw - var(--sbw) * ${(fluidMargin / 100).toFixed(5)})`,
           '--gutter': `calc(${fluidGutter.toFixed(5)}vw - var(--sbw) * ${(fluidGutter / 100).toFixed(5)})`,
-          '--column': `calc(${fluidColumn.toFixed(5)}vw - var(--sbw) * ${(fluidColumn / 100).toFixed(5)})`
+          '--column': `calc(${fluidColumn.toFixed(5)}vw - var(--sbw) * ${(fluidColumn / 100).toFixed(5)})`,
+          fontSize: maxFontSize || fontSize
         }
 
         addBase({
@@ -256,8 +255,7 @@ const grid = plugin.withOptions(
             '@supports (container-type: inline-size)': {
               'container-type': 'inline-size',
               '--sbw': 'calc(100vw - 100cqw)'
-            },
-            fontSize: maxFontSize || fontSize
+            }
             // '&::before': {
             //   content: 'counter(val) "px"',
             //   counterReset: 'val tan(atan2(var(--sbw), 1px))',
