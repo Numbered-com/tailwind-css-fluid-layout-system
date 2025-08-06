@@ -237,24 +237,26 @@ const grid = plugin.withOptions(
         const column = (gridWidth - (grid.columns - 1) * gutter) / grid.columns
         const fluidColumn = column * vw
 
-        const fontSize = `calc(${(vw * 16).toFixed(5)}vw - var(--sbw) * ${(16 / grid.mockupWidth).toFixed(5)})`
+        const fontSize = `calc(${(vw * 16).toPrecision(5)}vw - var(--sbw) * ${(16 / grid.mockupWidth).toPrecision(5)})`
         const fontMaxWidth = grid.fontScalingMaxWidth || grid.maxWidth
-        const maxFontSize = fontMaxWidth ? `min(${fontSize}, ${((16 * fontMaxWidth) / grid.mockupWidth).toFixed(3)}px)` : null
+        const maxFontSize = fontMaxWidth ? `min(${fontSize}, ${((16 * fontMaxWidth) / grid.mockupWidth).toPrecision(3)}px)` : null
 
         const vars = {
-          '--grid-width': `calc(${fluidGridWidth.toFixed(5)}vw - var(--sbw) * ${(fluidGridWidth / 100).toFixed(5)})`,
-          '--margin': `calc(${fluidMargin.toFixed(5)}vw - var(--sbw) * ${(fluidMargin / 100).toFixed(5)})`,
-          '--gutter': `calc(${fluidGutter.toFixed(5)}vw - var(--sbw) * ${(fluidGutter / 100).toFixed(5)})`,
-          '--column': `calc(${fluidColumn.toFixed(5)}vw - var(--sbw) * ${(fluidColumn / 100).toFixed(5)})`,
+          '--grid-width': `calc(${fluidGridWidth.toPrecision(6)}vw - var(--sbw) * ${(fluidGridWidth / 100).toPrecision(6)})`,
+          '--margin': `calc(${fluidMargin.toPrecision(6)}vw - var(--sbw) * ${(fluidMargin / 100).toPrecision(6)})`,
+          '--gutter': `calc(${fluidGutter.toPrecision(6)}vw - var(--sbw) * ${(fluidGutter / 100).toPrecision(6)})`,
+          '--column': `calc(${fluidColumn.toPrecision(6)}vw - var(--sbw) * ${(fluidColumn / 100).toPrecision(6)})`,
           fontSize: maxFontSize || fontSize
         }
 
         addBase({
           html: {
             '--sbw': '0px',
-            '@supports (container-type: inline-size)': {
-              'container-type': 'inline-size',
-              '--sbw': 'calc(100vw - 100cqw)'
+            '@media (hover: hover)': {
+              '@supports (container-type: inline-size)': {
+                'container-type': 'inline-size',
+                '--sbw': 'calc(100vw - 100cqw)'
+              }
             }
             // '&::before': {
             //   content: 'counter(val) "px"',
