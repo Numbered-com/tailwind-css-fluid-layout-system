@@ -42,10 +42,9 @@ export default function Index() {
           <MarkdownSample />
         </div>
       </article>
+      <div className='fixed bottom-0 left-0 right-0 bg-red-500 margin-pl-1'>Fixed</div>
     </div>
   )
 }
 
-export const config = {
-  unstable_runtimeJS: false
-}
+export const config = { unstable_runtimeJS: false }

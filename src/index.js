@@ -103,16 +103,8 @@ const margin = (count = 1, grid = null) => {
 
 const gridContainer = () => {
   return {
-    '.grid-container': {
-      display: 'block',
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      width: 'var(--grid-width)'
-    },
-    '.grid-container-full': {
-      marginLeft: 'calc(var(--margin) * -1)',
-      width: 'calc(var(--grid-width) + 2 * var(--margin))'
-    }
+    '.grid-container': { display: 'block', marginLeft: 'auto', marginRight: 'auto', width: 'var(--grid-width)' },
+    '.grid-container-full': { marginLeft: 'calc(var(--margin) * -1)', width: 'calc(var(--grid-width) + 2 * var(--margin))' }
   }
 }
 
@@ -160,9 +152,7 @@ const guidelines = (grids, screens, color = 'red') => {
 
   for (const [key, grid] of Object.entries(grids)) {
     if (grid.screen) {
-      o.body['&::after'][parseScreen(screens[grid.screen])] = {
-        background: guideline(grid, color)
-      }
+      o.body['&::after'][parseScreen(screens[grid.screen])] = { background: guideline(grid, color) }
     }
   }
 
@@ -252,32 +242,23 @@ const grid = plugin.withOptions(
         addBase({
           html: {
             '--sbw': '0px',
-            '@media (hover: hover)': {
-              '@supports (container-type: inline-size)': {
-                'container-type': 'inline-size',
-                '--sbw': 'calc(100vw - 100cqw)'
-              }
-            }
-            // '&::before': {
-            //   content: 'counter(val) "px"',
-            //   counterReset: 'val tan(atan2(var(--sbw), 1px))',
-            //   position: 'fixed',
-            //   color: 'red',
-            //   'z-index': 10000
-            // }
-          }
+            '@supports (container-type: inline-size)': { 'container-type': 'inline-size', '--sbw': 'calc(100vw - 100cqw)' },
+            // force sbw to 15px for safari < 18
+            '@supports (hanging-punctuation: first) and (font: -apple-system-body) and (-webkit-appearance: none) and (not (view-transition-name: none))': {
+              '--sbw': '15px'
+            },
+            // mobile reset
+            '@media (pointer: coarse)': { 'container-type': 'revert', '--sbw': '0px' }
+            // debug
+            // '&::before': { content: 'counter(val) "px"', counterReset: 'val tan(atan2(var(--sbw), 1px))', position: 'fixed', color: 'red', 'z-index': 10000 }
+          },
+          body: { overflow: 'overlay' }
         })
 
         if (mediaQuery) {
-          addBase({
-            html: {
-              [mediaQuery]: vars
-            }
-          })
+          addBase({ html: { [mediaQuery]: vars } })
         } else {
-          addBase({
-            html: vars
-          })
+          addBase({ html: vars })
         }
 
         if (grid.maxWidth) {
@@ -340,27 +321,9 @@ const grid = plugin.withOptions(
     return {
       theme: {
         grid: {
-          mobile: {
-            columns: 10,
-            gutter: 0.1,
-            margin: 20,
-            mockupWidth: 375
-          },
-          tablet: {
-            columns: 10,
-            gutter: 0.1,
-            margin: 30,
-            mockupWidth: 768,
-            screen: 'md'
-          },
-          desktop: {
-            columns: 12,
-            gutter: 0.1,
-            margin: 60,
-            mockupWidth: 1440,
-            maxWidth: 1920,
-            screen: 'lg'
-          }
+          mobile: { columns: 10, gutter: 0.1, margin: 20, mockupWidth: 375 },
+          tablet: { columns: 10, gutter: 0.1, margin: 30, mockupWidth: 768, screen: 'md' },
+          desktop: { columns: 12, gutter: 0.1, margin: 60, mockupWidth: 1440, maxWidth: 1920, screen: 'lg' }
         }
       }
     }
