@@ -1,7 +1,7 @@
 const fls = require('../src/index.js')
 
 module.exports = {
-  content: ['./demo/pages/**/*.{js,mdx}', './demo/components/**/*.{js,mdx}'],
+  content: ['./demo/**/*.{js,mdx}'],
   transform: { mdx: content => require('@mdx-js/mdx').sync(content) },
   theme: {
     grid: {
@@ -10,7 +10,7 @@ module.exports = {
       desktop: {
         columns: 12,
         gutter: 10,
-        margin: 30,
+        margin: 0,
         mockupWidth: 1440,
         fontScalingMaxWidth: 1540,
         screen: 'lg'

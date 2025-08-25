@@ -41,7 +41,7 @@ module.exports = {
     }
   },
   plugins: [fls({
-    color: 'red',
+    color: 'rgba(255,0,0,0.6)',
     enabled: process.env.NODE_ENV === 'development'
   })]
 }
@@ -175,3 +175,7 @@ Available utilities:
 | margin-mb-{size}
 | margin-ml-{size}
 | margin-gap-{size}
+
+#### Scrollbar Width
+
+Grid calculations use the `--sbw` CSS variable to account for scrollbar width. Unfortunately, dynamically determining this value in CSS alone is not reliable in 2025. By default, `--sbw` is set to 15px for desktop environments (`@media (pointer: fine)`), regardless of whether a scrollbar is actually visible. For more accurate results, you can set this value programmatically using JavaScript.

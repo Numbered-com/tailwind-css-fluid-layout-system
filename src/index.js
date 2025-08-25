@@ -242,17 +242,21 @@ const grid = plugin.withOptions(
         addBase({
           html: {
             '--sbw': '0px',
-            '@supports (container-type: inline-size)': { 'container-type': 'inline-size', '--sbw': 'calc(100vw - 100cqw)' },
+            // container-type: inline-size breaks sticky on chrome and old safari...
+            // '@supports (container-type: inline-size)': { 'container-type': 'inline-size', '--sbw': 'calc(100vw - 100cqw)' },
             // force sbw to 15px for safari < 18
-            '@supports (hanging-punctuation: first) and (font: -apple-system-body) and (-webkit-appearance: none) and (not (view-transition-name: none))': {
-              '--sbw': '15px'
-            },
+            // '@supports (hanging-punctuation: first) and (font: -apple-system-body) and (-webkit-appearance: none) and (not (view-transition-name: none))': {
+            //   '--sbw': '15px'
+            // },
             // mobile reset
-            '@media (pointer: coarse)': { 'container-type': 'revert', '--sbw': '0px' }
+            // '@media (pointer: coarse)': { 'container-type': 'revert', '--sbw': '0px' }
+            '@media (pointer: fine)': { '--sbw': '15px' }
             // debug
             // '&::before': { content: 'counter(val) "px"', counterReset: 'val tan(atan2(var(--sbw), 1px))', position: 'fixed', color: 'red', 'z-index': 10000 }
           },
-          body: { overflow: 'overlay' }
+          body: {
+            overflow: 'overlay'
+          }
         })
 
         if (mediaQuery) {
