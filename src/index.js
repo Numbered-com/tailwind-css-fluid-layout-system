@@ -250,7 +250,7 @@ const grid = plugin.withOptions(
             // },
             // mobile reset
             // '@media (pointer: coarse)': { 'container-type': 'revert', '--sbw': '0px' }
-            '@media (pointer: fine)': { '--sbw': '15px' }
+            '@media (pointer: fine)': { '--sbw': '17px' }
             // debug
             // '&::before': { content: 'counter(val) "px"', counterReset: 'val tan(atan2(var(--sbw), 1px))', position: 'fixed', color: 'red', 'z-index': 10000 }
           },
