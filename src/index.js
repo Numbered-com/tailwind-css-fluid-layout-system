@@ -38,7 +38,7 @@ const utilities = {
   gap: 'gap',
   'gap-x': 'column-gap',
   'gap-y': 'row-gap',
-  indent: 'indent',
+  indent: 'text-indent',
   border: 'border-width',
   'border-t': 'border-top-width',
   'border-r': 'border-right-width',
