@@ -253,10 +253,10 @@ const grid = plugin.withOptions(
             '@media (pointer: fine)': { '--sbw': '17px' }
             // debug
             // '&::before': { content: 'counter(val) "px"', counterReset: 'val tan(atan2(var(--sbw), 1px))', position: 'fixed', color: 'red', 'z-index': 10000 }
-          },
-          body: {
-            overflow: 'overlay'
           }
+          // body: {
+          //   overflow: 'overlay'
+          // }
         })
 
         if (mediaQuery) {
