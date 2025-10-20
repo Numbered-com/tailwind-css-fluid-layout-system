@@ -69,6 +69,14 @@ In case you set a max-width to one of your grid layout, you'll need to wrap your
 </div>
 ```
 
+The plugin also provides a `grid-container-full` class that extends the container with negative margins to fill the full width including the grid margins.
+
+```html
+<div className='grid-container-full'>
+  [...]
+</div>
+```
+
 ### Utility classes
 
 #### Span
@@ -106,7 +114,38 @@ Available utilities:
 | span-mr-{size}-{?wide\|wider}
 | span-mb-{size}-{?wide\|wider}
 | span-ml-{size}-{?wide\|wider}
+| span-scroll-m-{size}-{?wide\|wider}
+| span-scroll-mx-{size}-{?wide\|wider}
+| span-scroll-my-{size}-{?wide\|wider}
+| span-scroll-mt-{size}-{?wide\|wider}
+| span-scroll-mr-{size}-{?wide\|wider}
+| span-scroll-mb-{size}-{?wide\|wider}
+| span-scroll-ml-{size}-{?wide\|wider}
+| span-scroll-p-{size}-{?wide\|wider}
+| span-scroll-px-{size}-{?wide\|wider}
+| span-scroll-py-{size}-{?wide\|wider}
+| span-scroll-pt-{size}-{?wide\|wider}
+| span-scroll-pr-{size}-{?wide\|wider}
+| span-scroll-pb-{size}-{?wide\|wider}
+| span-scroll-pl-{size}-{?wide\|wider}
+| span-inset-{size}-{?wide\|wider}
+| span-inset-x-{size}-{?wide\|wider}
+| span-inset-y-{size}-{?wide\|wider}
+| span-top-{size}-{?wide\|wider}
+| span-right-{size}-{?wide\|wider}
+| span-bottom-{size}-{?wide\|wider}
+| span-left-{size}-{?wide\|wider}
 | span-gap-{size}-{?wide\|wider}
+| span-gap-x-{size}-{?wide\|wider}
+| span-gap-y-{size}-{?wide\|wider}
+| span-indent-{size}-{?wide\|wider}
+| span-border-{size}-{?wide\|wider}
+| span-border-t-{size}-{?wide\|wider}
+| span-border-r-{size}-{?wide\|wider}
+| span-border-b-{size}-{?wide\|wider}
+| span-border-l-{size}-{?wide\|wider}
+| span-border-x-{size}-{?wide\|wider}
+| span-border-y-{size}-{?wide\|wider}
 
 #### Gutter
 
@@ -140,7 +179,38 @@ Available utilities:
 | gutter-mr-{size}
 | gutter-mb-{size}
 | gutter-ml-{size}
+| gutter-scroll-m-{size}
+| gutter-scroll-mx-{size}
+| gutter-scroll-my-{size}
+| gutter-scroll-mt-{size}
+| gutter-scroll-mr-{size}
+| gutter-scroll-mb-{size}
+| gutter-scroll-ml-{size}
+| gutter-scroll-p-{size}
+| gutter-scroll-px-{size}
+| gutter-scroll-py-{size}
+| gutter-scroll-pt-{size}
+| gutter-scroll-pr-{size}
+| gutter-scroll-pb-{size}
+| gutter-scroll-pl-{size}
+| gutter-inset-{size}
+| gutter-inset-x-{size}
+| gutter-inset-y-{size}
+| gutter-top-{size}
+| gutter-right-{size}
+| gutter-bottom-{size}
+| gutter-left-{size}
 | gutter-gap-{size}
+| gutter-gap-x-{size}
+| gutter-gap-y-{size}
+| gutter-indent-{size}
+| gutter-border-{size}
+| gutter-border-t-{size}
+| gutter-border-r-{size}
+| gutter-border-b-{size}
+| gutter-border-l-{size}
+| gutter-border-x-{size}
+| gutter-border-y-{size}
 
 #### Margin
 
@@ -174,7 +244,61 @@ Available utilities:
 | margin-mr-{size}
 | margin-mb-{size}
 | margin-ml-{size}
+| margin-scroll-m-{size}
+| margin-scroll-mx-{size}
+| margin-scroll-my-{size}
+| margin-scroll-mt-{size}
+| margin-scroll-mr-{size}
+| margin-scroll-mb-{size}
+| margin-scroll-ml-{size}
+| margin-scroll-p-{size}
+| margin-scroll-px-{size}
+| margin-scroll-py-{size}
+| margin-scroll-pt-{size}
+| margin-scroll-pr-{size}
+| margin-scroll-pb-{size}
+| margin-scroll-pl-{size}
+| margin-inset-{size}
+| margin-inset-x-{size}
+| margin-inset-y-{size}
+| margin-top-{size}
+| margin-right-{size}
+| margin-bottom-{size}
+| margin-left-{size}
 | margin-gap-{size}
+| margin-gap-x-{size}
+| margin-gap-y-{size}
+| margin-indent-{size}
+| margin-border-{size}
+| margin-border-t-{size}
+| margin-border-r-{size}
+| margin-border-b-{size}
+| margin-border-l-{size}
+| margin-border-x-{size}
+| margin-border-y-{size}
+
+### Example Usage
+
+Here are some examples of the plugin classes used in the demo:
+
+```jsx
+// Grid container to wrap content
+<article className='grid-container py-10'>
+
+  // Content spanning 8 columns at large breakpoint with 2-column offset including a gutter
+  <div className='lg:span-w-8 lg:span-ml-2-wide'>
+    Content here
+  </div>
+
+  // Fixed element with padding based on grid margin
+  <div className='fixed margin-pl-1'>
+    Fixed content
+  </div>
+
+</article>
+```
+
+All plugin utilities support Tailwind's responsive prefixes (`sm:`, `md:`, `lg:`, `xl:`, `2xl:`).
 
 #### Scrollbar Width
 
