@@ -145,9 +145,9 @@ const guideline = (grid, color = 'red') => {
   return style
 }
 
-const guidelines = (grids, screens, color = 'red') => {
+const guidelines = (grids, screens, color = 'red', selector = 'body') => {
   const o = {
-    body: {
+    [selector]: {
       '&::after': {
         content: "''",
         position: 'fixed',
@@ -166,7 +166,7 @@ const guidelines = (grids, screens, color = 'red') => {
 
   for (const [key, grid] of Object.entries(grids)) {
     if (grid.screen) {
-      o.body['&::after'][parseScreen(screens[grid.screen])] = { background: guideline(grid, color) }
+      o[selector]['&::after'][parseScreen(screens[grid.screen])] = { background: guideline(grid, color) }
     }
   }
 
@@ -342,7 +342,7 @@ const grid = plugin.withOptions(
       // guidelines
 
       if (options?.guidelines || (options?.guidelines === undefined && process.env.NODE_ENV === 'development')) {
-        addBase(guidelines(grids, theme('screens'), options?.color || 'red'))
+        addBase(guidelines(grids, theme('screens'), options?.color || 'red', options?.guidelinesSelector || 'body'))
       }
     }
   },

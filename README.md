@@ -310,7 +310,19 @@ Grid calculations use the `--sbw` CSS variable to account for scrollbar width. U
 | ------ | ---- | ----------- |
 | `color` | `string` | Color for the grid guidelines overlay |
 | `guidelines` | `boolean` | Enable/disable guidelines (defaults to `true` in development) |
+| `guidelinesSelector` | `string` | CSS selector for the guidelines container (defaults to `'body'`) |
 | `fluidUnit` | `function` | Custom function to compute fluid CSS units |
+
+#### Guidelines Selector
+
+By default, the grid overlay is rendered using `body::after`. You can change this to target a different element:
+
+```js
+fls({
+  guidelines: true,
+  guidelinesSelector: '.grid-container'  // Use a custom container
+})
+```
 
 #### Custom Fluid Unit
 
