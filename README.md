@@ -42,7 +42,7 @@ module.exports = {
   },
   plugins: [fls({
     color: 'rgba(255,0,0,0.6)',
-    enabled: process.env.NODE_ENV === 'development'
+    guidelines: process.env.NODE_ENV === 'development'
   })]
 }
 ```
@@ -303,3 +303,41 @@ All plugin utilities support Tailwind's responsive prefixes (`sm:`, `md:`, `lg:`
 #### Scrollbar Width
 
 Grid calculations use the `--sbw` CSS variable to account for scrollbar width. Unfortunately, dynamically determining this value in CSS alone is not reliable in 2025. By default, `--sbw` is set to 17px for desktop environments (`@media (pointer: fine)`), regardless of whether a scrollbar is actually visible. For more accurate results, you can set this value programmatically using JavaScript.
+
+### Plugin Options
+
+| Option | Type | Description |
+| ------ | ---- | ----------- |
+| `color` | `string` | Color for the grid guidelines overlay |
+| `guidelines` | `boolean` | Enable/disable guidelines (defaults to `true` in development) |
+| `fluidUnit` | `function` | Custom function to compute fluid CSS units |
+
+#### Custom Fluid Unit
+
+By default, the plugin uses `vw` units for fluid calculations. You can provide a custom `fluidUnit` function to use different units (e.g., `cqw` for container queries):
+
+```js
+const fls = require('@numbered/tailwind-fluid-layout-system')
+
+module.exports = {
+  plugins: [
+    fls({
+      // Use container query width units instead of viewport width
+      fluidUnit: value => `${value.toPrecision(6)}cqw`
+    })
+  ]
+}
+```
+
+The function receives a numeric value (the fluid percentage) and should return a CSS value string with the unit. The default implementation is:
+
+```js
+const defaultFluidUnit = value => `${value.toPrecision(6)}vw`
+```
+
+You can also import the default function if needed:
+
+```js
+const fls = require('@numbered/tailwind-fluid-layout-system')
+const { defaultFluidUnit } = fls
+```

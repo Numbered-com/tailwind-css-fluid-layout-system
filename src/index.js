@@ -1,5 +1,12 @@
 const plugin = require('tailwindcss/plugin')
 
+/**
+ * Default fluid unit computation
+ * @param {number} value - The fluid percentage value (e.g., 26.6667 for ~26.67vw)
+ * @returns {string} - CSS value with unit
+ */
+const defaultFluidUnit = value => `${value.toPrecision(6)}vw`
+
 const utilities = {
   w: 'width',
   'min-w': 'min-width',
@@ -206,6 +213,17 @@ const grid = plugin.withOptions(
       const grids = theme('grid')
       if (grids.mobile === undefined) throw new Error(`grid.mobile is the default and cannot be undefined`)
 
+      const fluidUnit = options?.fluidUnit || defaultFluidUnit
+
+      /**
+       * Compute a fluid CSS value with scrollbar width compensation
+       * @param {number} fluidValue - The fluid percentage value
+       * @returns {string} - CSS calc expression
+       */
+      const computeFluidValue = fluidValue => {
+        return `calc(${fluidUnit(fluidValue)} - var(--sbw) * ${(fluidValue / 100).toPrecision(6)})`
+      }
+
       for (const key in grids) {
         const grid = grids[key]
 
@@ -239,10 +257,10 @@ const grid = plugin.withOptions(
         const maxFontSize = fontMaxWidth ? `min(${fontSize}, ${((16 * fontMaxWidth) / grid.mockupWidth).toPrecision(3)}px)` : null
 
         const vars = {
-          '--grid-width': `calc(${fluidGridWidth.toPrecision(6)}vw - var(--sbw) * ${(fluidGridWidth / 100).toPrecision(6)})`,
-          '--margin': `calc(${fluidMargin.toPrecision(6)}vw - var(--sbw) * ${(fluidMargin / 100).toPrecision(6)})`,
-          '--gutter': `calc(${fluidGutter.toPrecision(6)}vw - var(--sbw) * ${(fluidGutter / 100).toPrecision(6)})`,
-          '--column': `calc(${fluidColumn.toPrecision(6)}vw - var(--sbw) * ${(fluidColumn / 100).toPrecision(6)})`,
+          '--grid-width': computeFluidValue(fluidGridWidth),
+          '--margin': computeFluidValue(fluidMargin),
+          '--gutter': computeFluidValue(fluidGutter),
+          '--column': computeFluidValue(fluidColumn),
           fontSize: maxFontSize || fontSize
         }
 
@@ -342,3 +360,4 @@ const grid = plugin.withOptions(
 )
 
 module.exports = grid
+module.exports.defaultFluidUnit = defaultFluidUnit
