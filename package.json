@@ -1,15 +1,18 @@
 {
 	"name": "@numbered/tailwind-fluid-layout-system",
-	"version": "0.7.2",
+	"version": "0.8.0",
 	"description": "A Tailwind CSS plugin to fluidify layout.",
 	"main": "src/index.js",
+	"bin": {
+		"px-to-cols": "./src/cli.js"
+	},
 	"files": [
 		"src/*.js",
 		"dist/"
 	],
 	"repository": {
 		"type": "git",
-		"url": "git+https://gitlab.com/numbered/npm/tailwind-css-fluid-layout-system.git"
+		"url": "git+https://github.com/Numbered-com/tailwind-css-fluid-layout-system.git"
 	},
 	"license": "MIT",
 	"publishConfig": {
