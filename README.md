@@ -1,51 +1,39 @@
 # Tailwind CSS Fluid Layout System
 
-An unofficial [Tailwind](https://tailwindcss.com/) plugin attempting to ease fluid layout implementation.
+An unofficial [Tailwind](https://tailwindcss.com/) plugin that eases fluid, responsive layout. It turns a column grid into utilities that scale smoothly with the viewport, and ships a [`px-to-cols`](#pixel--column-conversion) CLI to convert design pixel values into grid spans.
 
 ## Installation
 
 ```bash
-npm i -D @numbered/tailwind-fluid-layout-system
+pnpm add -D @numbered/tailwind-fluid-layout-system
+# or
+bun add -D @numbered/tailwind-fluid-layout-system
 ```
 
-Then import the plugin to your `tailwind.config.js`, add configure it.
+Import and configure the plugin in your Tailwind config:
 
 ```js
-const fls = require('@numbered/tailwind-fluid-layout-system')
+// tailwind.config.js
+import fls from '@numbered/tailwind-fluid-layout-system'
 
-module.exports = {
+export default {
   theme: {
     grid: {
-      mobile: {
-        columns: 10,
-        mockupWidth: 375,
-        gutter: 10,
-        margin: 20
-      },
-      tablet: {
-        columns: 10,
-        mockupWidth: 768,
-        gutter: 10,
-        margin: 30,
-        screen: 'md'
-      },
-      desktop: {
-        columns: 12,
-        mockupWidth: 1440,
-        gutter: 20,
-        margin: 60,
-        maxWidth: 1920,
-        fontScalingMaxWidth: 1540,
-        screen: 'lg'
-      }
-    }
+      mobile:  { columns: 10, mockupWidth: 375,  gutter: 10, margin: 20 },
+      tablet:  { columns: 10, mockupWidth: 768,  gutter: 10, margin: 30, screen: 'md' },
+      desktop: { columns: 12, mockupWidth: 1440, gutter: 20, margin: 60, maxWidth: 1920, fontScalingMaxWidth: 1540, screen: 'lg' },
+    },
   },
-  plugins: [fls({
-    color: 'rgba(255,0,0,0.6)',
-    guidelines: process.env.NODE_ENV === 'development'
-  })]
+  plugins: [
+    fls({
+      color: 'rgba(255,0,0,0.6)',
+      guidelines: process.env.NODE_ENV === 'development',
+    }),
+  ],
 }
 ```
+
+Each breakpoint takes `columns`, `mockupWidth`, plus `gutter` and `margin` in px, and optionally `screen` (a key from `theme.screens`), `maxWidth` and `fontScalingMaxWidth`.
 
 ## Motivation
 
@@ -79,203 +67,32 @@ The plugin also provides a `grid-container-full` class that extends the containe
 
 ### Utility classes
 
-#### Span
+Three prefixes turn any Tailwind spacing or sizing utility into a grid value, written as `{prefix}-{utility}-{size}`:
 
-A `span` defines a number of columns. It can be called with any Tailwind spacing or sizing utility: `span-{spacing|sizing}-{size}`.
-You can prefix it with `-wide` or `-wider`to respectively add one or two gutters.
-
-```jsx
-<div className="span-w-2">A 2 column span</div>
-<div className="span-w-2-wide">A 2 column span with 1 gutter</div>
-<div className="span-w-2-wider">A 2 column span with 2 gutters</div>
-```
-
-Available utilities:
-
-| Class
-| ---------------------------------
-| span-w-{size}-{?wide\|wider}
-| span-min-w-{size}-{?wide\|wider}
-| span-max-w-{size}-{?wide\|wider}
-| span-h-{size}-{?wide\|wider}
-| span-min-h-{size}-{?wide\|wider}
-| span-max-h-{size}-{?wide\|wider}
-| span-p-{size}-{?wide\|wider}
-| span-px-{size}-{?wide\|wider}
-| span-py-{size}-{?wide\|wider}
-| span-pt-{size}-{?wide\|wider}
-| span-pr-{size}-{?wide\|wider}
-| span-pb-{size}-{?wide\|wider}
-| span-pl-{size}-{?wide\|wider}
-| span-m-{size}-{?wide\|wider}
-| span-mx-{size}-{?wide\|wider}
-| span-my-{size}-{?wide\|wider}
-| span-mt-{size}-{?wide\|wider}
-| span-mr-{size}-{?wide\|wider}
-| span-mb-{size}-{?wide\|wider}
-| span-ml-{size}-{?wide\|wider}
-| span-scroll-m-{size}-{?wide\|wider}
-| span-scroll-mx-{size}-{?wide\|wider}
-| span-scroll-my-{size}-{?wide\|wider}
-| span-scroll-mt-{size}-{?wide\|wider}
-| span-scroll-mr-{size}-{?wide\|wider}
-| span-scroll-mb-{size}-{?wide\|wider}
-| span-scroll-ml-{size}-{?wide\|wider}
-| span-scroll-p-{size}-{?wide\|wider}
-| span-scroll-px-{size}-{?wide\|wider}
-| span-scroll-py-{size}-{?wide\|wider}
-| span-scroll-pt-{size}-{?wide\|wider}
-| span-scroll-pr-{size}-{?wide\|wider}
-| span-scroll-pb-{size}-{?wide\|wider}
-| span-scroll-pl-{size}-{?wide\|wider}
-| span-inset-{size}-{?wide\|wider}
-| span-inset-x-{size}-{?wide\|wider}
-| span-inset-y-{size}-{?wide\|wider}
-| span-top-{size}-{?wide\|wider}
-| span-right-{size}-{?wide\|wider}
-| span-bottom-{size}-{?wide\|wider}
-| span-left-{size}-{?wide\|wider}
-| span-gap-{size}-{?wide\|wider}
-| span-gap-x-{size}-{?wide\|wider}
-| span-gap-y-{size}-{?wide\|wider}
-| span-indent-{size}-{?wide\|wider}
-| span-border-{size}-{?wide\|wider}
-| span-border-t-{size}-{?wide\|wider}
-| span-border-r-{size}-{?wide\|wider}
-| span-border-b-{size}-{?wide\|wider}
-| span-border-l-{size}-{?wide\|wider}
-| span-border-x-{size}-{?wide\|wider}
-| span-border-y-{size}-{?wide\|wider}
-
-#### Gutter
-
-A `gutter` defines a number of columns. It can be called with any Tailwind spacing or sizing utility: `gutter-{spacing|sizing}-{size}`
+- **`span-`** — a number of columns, gutters included. Add a `-wide` / `-wider` suffix for one / two extra gutters.
+- **`gutter-`** — a number of gutters.
+- **`margin-`** — a number of outer grid margins.
 
 ```jsx
-<div className="gutter-ml-1">A margin left of 1 gutter</div>
+<div className="span-w-2">2-column span</div>
+<div className="span-w-2-wide">2-column span + 1 gutter</div>
+<div className="gutter-ml-1">left margin of 1 gutter</div>
+<div className="margin-pl-1">left padding of 1 grid margin</div>
 ```
 
-Available utilities:
+Every utility below works with all three prefixes:
 
-| Class
-| ---------------------------------
-| gutter-w-{size}
-| gutter-min-w-{size}
-| gutter-max-w-{size}
-| gutter-h-{size}
-| gutter-min-h-{size}
-| gutter-max-h-{size}
-| gutter-p-{size}
-| gutter-px-{size}
-| gutter-py-{size}
-| gutter-pt-{size}
-| gutter-pr-{size}
-| gutter-pb-{size}
-| gutter-pl-{size}
-| gutter-m-{size}
-| gutter-mx-{size}
-| gutter-my-{size}
-| gutter-mt-{size}
-| gutter-mr-{size}
-| gutter-mb-{size}
-| gutter-ml-{size}
-| gutter-scroll-m-{size}
-| gutter-scroll-mx-{size}
-| gutter-scroll-my-{size}
-| gutter-scroll-mt-{size}
-| gutter-scroll-mr-{size}
-| gutter-scroll-mb-{size}
-| gutter-scroll-ml-{size}
-| gutter-scroll-p-{size}
-| gutter-scroll-px-{size}
-| gutter-scroll-py-{size}
-| gutter-scroll-pt-{size}
-| gutter-scroll-pr-{size}
-| gutter-scroll-pb-{size}
-| gutter-scroll-pl-{size}
-| gutter-inset-{size}
-| gutter-inset-x-{size}
-| gutter-inset-y-{size}
-| gutter-top-{size}
-| gutter-right-{size}
-| gutter-bottom-{size}
-| gutter-left-{size}
-| gutter-gap-{size}
-| gutter-gap-x-{size}
-| gutter-gap-y-{size}
-| gutter-indent-{size}
-| gutter-border-{size}
-| gutter-border-t-{size}
-| gutter-border-r-{size}
-| gutter-border-b-{size}
-| gutter-border-l-{size}
-| gutter-border-x-{size}
-| gutter-border-y-{size}
-
-#### Margin
-
-A `margin` defines the outter grid margin number of columns. It can be called with any Tailwind spacing or sizing utility: `span-{spacing|sizing}-{size}`
-
-```jsx
-<div className="margin-pl-1">A padding left of 1 grid margin</div>
-```
-
-Available utilities:
-
-| Class
-| ---------------------------------
-| margin-w-{size}
-| margin-min-w-{size}
-| margin-max-w-{size}
-| margin-h-{size}
-| margin-min-h-{size}
-| margin-max-h-{size}
-| margin-p-{size}
-| margin-px-{size}
-| margin-py-{size}
-| margin-pt-{size}
-| margin-pr-{size}
-| margin-pb-{size}
-| margin-pl-{size}
-| margin-m-{size}
-| margin-mx-{size}
-| margin-my-{size}
-| margin-mt-{size}
-| margin-mr-{size}
-| margin-mb-{size}
-| margin-ml-{size}
-| margin-scroll-m-{size}
-| margin-scroll-mx-{size}
-| margin-scroll-my-{size}
-| margin-scroll-mt-{size}
-| margin-scroll-mr-{size}
-| margin-scroll-mb-{size}
-| margin-scroll-ml-{size}
-| margin-scroll-p-{size}
-| margin-scroll-px-{size}
-| margin-scroll-py-{size}
-| margin-scroll-pt-{size}
-| margin-scroll-pr-{size}
-| margin-scroll-pb-{size}
-| margin-scroll-pl-{size}
-| margin-inset-{size}
-| margin-inset-x-{size}
-| margin-inset-y-{size}
-| margin-top-{size}
-| margin-right-{size}
-| margin-bottom-{size}
-| margin-left-{size}
-| margin-gap-{size}
-| margin-gap-x-{size}
-| margin-gap-y-{size}
-| margin-indent-{size}
-| margin-border-{size}
-| margin-border-t-{size}
-| margin-border-r-{size}
-| margin-border-b-{size}
-| margin-border-l-{size}
-| margin-border-x-{size}
-| margin-border-y-{size}
+| Tailwind utility | `span-` (+ `-wide`/`-wider`) | `gutter-` | `margin-` |
+| ---------------- | :--------------------------: | :-------: | :-------: |
+| **Sizing** — `w` `min-w` `max-w` `h` `min-h` `max-h` | ✓ | ✓ | ✓ |
+| **Padding** — `p` `px` `py` `pt` `pr` `pb` `pl` | ✓ | ✓ | ✓ |
+| **Margin** — `m` `mx` `my` `mt` `mr` `mb` `ml` | ✓ | ✓ | ✓ |
+| **Scroll margin** — `scroll-m` `scroll-mx` `scroll-my` `scroll-mt` `scroll-mr` `scroll-mb` `scroll-ml` | ✓ | ✓ | ✓ |
+| **Scroll padding** — `scroll-p` `scroll-px` `scroll-py` `scroll-pt` `scroll-pr` `scroll-pb` `scroll-pl` | ✓ | ✓ | ✓ |
+| **Position / inset** — `inset` `inset-x` `inset-y` `top` `right` `bottom` `left` | ✓ | ✓ | ✓ |
+| **Gap** — `gap` `gap-x` `gap-y` | ✓ | ✓ | ✓ |
+| **Border width** — `border` `border-t` `border-r` `border-b` `border-l` `border-x` `border-y` | ✓ | ✓ | ✓ |
+| **Text indent** — `indent` | ✓ | ✓ | ✓ |
 
 ### Example Usage
 
@@ -329,9 +146,9 @@ fls({
 By default, the plugin uses `vw` units for fluid calculations. You can provide a custom `fluidUnit` function to use different units (e.g., `cqw` for container queries):
 
 ```js
-const fls = require('@numbered/tailwind-fluid-layout-system')
+import fls from '@numbered/tailwind-fluid-layout-system'
 
-module.exports = {
+export default {
   plugins: [
     fls({
       // Use container query width units instead of viewport width
@@ -350,6 +167,66 @@ const defaultFluidUnit = value => `${value.toPrecision(6)}vw`
 You can also import the default function if needed:
 
 ```js
-const fls = require('@numbered/tailwind-fluid-layout-system')
-const { defaultFluidUnit } = fls
+import { defaultFluidUnit } from '@numbered/tailwind-fluid-layout-system'
 ```
+
+---
+
+## Pixel → column conversion
+
+When implementing a design, convert a measured pixel width into the closest grid span class with the bundled `px-to-cols` CLI. Run it with `bunx` — it uses the local install when the package is a dependency, or fetches it on the fly:
+
+```bash
+bunx px-to-cols 330 --columns 24 --mockup 1440 --gutter 24 --margin 24
+# → span-w-6 (330px, exact)
+
+bunx px-to-cols 250 --columns 24 --mockup 1440 --gutter 24 --margin 24
+# → span-w-4-wider (260px, +10px)
+```
+
+| Argument    | Default | Description                                                                |
+| ----------- | ------- | -------------------------------------------------------------------------- |
+| `<pixels>`  | —       | The pixel value to convert (positional)                                    |
+| `--columns` | `24`    | Number of grid columns                                                     |
+| `--mockup`  | `1440`  | Mockup width in px                                                         |
+| `--gutter`  | `24`    | Gutter size in px                                                          |
+| `--margin`  | `24`    | Outer margin in px                                                         |
+| `--json`    | —       | Output the full JSON result                                               |
+| `--batch`   | —       | Read a JSON array from stdin, write a JSON array (one process, many values) |
+
+Values smaller than one column resolve to a `gutter-gap-*` multiple instead of `span-w-*`.
+
+With `--json` you get the full result, including the resolved grid config:
+
+```json
+{
+  "className": "span-w-6",
+  "columns": 6,
+  "actualWidth": 330,
+  "pixelDifference": 0,
+  "gridConfig": { "columns": 24, "mockupWidth": 1440, "gutter": 24, "margin": 24, "columnWidth": 35, "contentWidth": 1392 }
+}
+```
+
+To convert many values at once (e.g. from a script), pipe a JSON array to `--batch` — it runs the converter in a single process:
+
+```bash
+echo '[{"pixels":330,"columns":24,"mockupWidth":1440,"gutter":24,"margin":24}]' | bunx px-to-cols --batch
+```
+
+## Programmatic API
+
+The grid math is exported as well. Import the dependency-free helpers from the `/grid-math` subpath (no Tailwind required) — handy for build scripts and tooling:
+
+```js
+import { pixelsToColumns, span, gutter, margin } from '@numbered/tailwind-fluid-layout-system/grid-math'
+
+// pixels → closest span (inverse of span())
+pixelsToColumns(330, { columns: 24, mockupWidth: 1440, gutter: 24, margin: 24 })
+// → { className: 'span-w-6', columns: 6, actualWidth: 330, pixelDifference: 0, gridConfig: { … } }
+
+// columns → pixels
+span(6, { columns: 24, mockupWidth: 1440, gutter: 24, margin: 24 }) // → 330
+```
+
+`span`, `gutter`, `margin`, `pixelsToColumns` and `defaultFluidUnit` are also re-exported from the package root, alongside the default plugin export.
