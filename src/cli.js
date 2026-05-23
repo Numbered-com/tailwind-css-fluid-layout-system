@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 
-const { pixelsToColumns } = require("./index.js");
+const { pixelsToColumns } = require("./grid-math.js");
 
 const HELP = `px-to-cols — convert a pixel value to a fluid grid span class
 
@@ -74,13 +74,23 @@ async function runBatch() {
 	console.log(JSON.stringify(results));
 }
 
+function userArgs() {
+	const argv = process.argv.slice(1); // drop the runtime executable
+	// Drop the script/bin path when present (node & bun include it; bunx may not).
+	if (argv[0] && (argv[0] === __filename || /(?:^|[\\/])(cli\.js|px-to-cols)$/.test(argv[0]))) {
+		argv.shift();
+	}
+	return argv;
+}
+
 function main() {
-	if (process.argv.slice(2).includes("--batch")) {
+	const args = userArgs();
+	if (args.includes("--batch")) {
 		runBatch();
 		return;
 	}
 
-	const { pixels, opts } = parseArgs(process.argv.slice(2));
+	const { pixels, opts } = parseArgs(args);
 
 	if (opts.help || pixels === undefined || Number.isNaN(pixels)) {
 		console.log(HELP);
