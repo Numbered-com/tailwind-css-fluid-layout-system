@@ -78,8 +78,10 @@ async function runBatch() {
 
 function userArgs() {
 	const argv = process.argv.slice(1); // drop the runtime executable
-	// Drop the script/bin path when present (node & bun include it; bunx may not).
-	if (argv[0] && (argv[0] === SCRIPT_PATH || /(?:^|[\\/])(cli\.js|px-to-cols)$/.test(argv[0]))) {
+	// Drop leading script-path / bin-name tokens. Runtimes differ: node & bun
+	// pass the script path; `bunx --package` fetch-and-run can prepend both the
+	// script path AND the bin name. Loop so we strip whatever combination shows up.
+	while (argv[0] && (argv[0] === SCRIPT_PATH || /(?:^|[\\/])(cli\.js|px-to-cols)$/.test(argv[0]))) {
 		argv.shift();
 	}
 	return argv;
