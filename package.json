@@ -1,8 +1,13 @@
 {
 	"name": "@numbered/tailwind-fluid-layout-system",
-	"version": "0.8.1",
+	"version": "0.9.0",
 	"description": "A Tailwind CSS plugin to fluidify layout.",
+	"type": "module",
 	"main": "src/index.js",
+	"exports": {
+		".": "./src/index.js",
+		"./grid-math": "./src/grid-math.js"
+	},
 	"bin": {
 		"px-to-cols": "./src/cli.js"
 	},

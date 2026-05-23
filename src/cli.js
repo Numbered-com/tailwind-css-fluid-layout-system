@@ -1,7 +1,9 @@
 #!/usr/bin/env node
-"use strict";
 
-const { pixelsToColumns } = require("./grid-math.js");
+import { fileURLToPath } from "node:url";
+import { pixelsToColumns } from "./grid-math.js";
+
+const SCRIPT_PATH = fileURLToPath(import.meta.url);
 
 const HELP = `px-to-cols — convert a pixel value to a fluid grid span class
 
@@ -77,7 +79,7 @@ async function runBatch() {
 function userArgs() {
 	const argv = process.argv.slice(1); // drop the runtime executable
 	// Drop the script/bin path when present (node & bun include it; bunx may not).
-	if (argv[0] && (argv[0] === __filename || /(?:^|[\\/])(cli\.js|px-to-cols)$/.test(argv[0]))) {
+	if (argv[0] && (argv[0] === SCRIPT_PATH || /(?:^|[\\/])(cli\.js|px-to-cols)$/.test(argv[0]))) {
 		argv.shift();
 	}
 	return argv;

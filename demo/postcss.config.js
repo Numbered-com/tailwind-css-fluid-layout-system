@@ -1,6 +1,6 @@
-module.exports = {
+export default {
   plugins: {
-    tailwindcss: { config: `${__dirname}/tailwind.config.js` },
+    tailwindcss: { config: new URL("./tailwind.config.js", import.meta.url).pathname },
     autoprefixer: {},
   },
 }

@@ -1,8 +1,10 @@
-const fls = require('../src/index.js')
+import fls from '../src/index.js'
+import typography from '@tailwindcss/typography'
+import * as mdx from '@mdx-js/mdx'
 
-module.exports = {
+export default {
   content: ['./demo/**/*.{js,mdx}'],
-  transform: { mdx: content => require('@mdx-js/mdx').sync(content) },
+  transform: { mdx: content => mdx.sync(content) },
   theme: {
     grid: {
       mobile: { columns: 6, gutter: 0.1, margin: 10, mockupWidth: 375, fontScalingMaxWidth: 500 },
@@ -20,7 +22,7 @@ module.exports = {
   },
   variants: {},
   plugins: [
-    require('@tailwindcss/typography'),
+    typography,
     fls({
       color: 'rgba(255,0,0,0.6)',
       guidelines: true // force enable guidelines on production env

@@ -1,4 +1,4 @@
-const plugin = require("tailwindcss/plugin");
+import plugin from "tailwindcss/plugin.js";
 
 /**
  * Default fluid unit computation
@@ -64,7 +64,7 @@ const utilities = {
 
 // -----------------------------------------------------o spans & gutters
 
-const { span, gutter, margin, pixelsToColumns } = require("./grid-math");
+import { span, gutter, margin, pixelsToColumns } from "./grid-math.js";
 
 const gridContainer = () => {
 	return {
@@ -360,9 +360,5 @@ const grid = plugin.withOptions(
 	},
 );
 
-module.exports = grid;
-module.exports.defaultFluidUnit = defaultFluidUnit;
-module.exports.span = span;
-module.exports.gutter = gutter;
-module.exports.margin = margin;
-module.exports.pixelsToColumns = pixelsToColumns;
+export default grid;
+export { defaultFluidUnit, span, gutter, margin, pixelsToColumns };

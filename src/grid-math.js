@@ -1,6 +1,4 @@
-"use strict";
-
-// Pure grid math — no Tailwind/runtime dependencies, so it can be required by
+// Pure grid math — no Tailwind/runtime dependencies, so it can be imported by
 // both the plugin (index.js) and the standalone CLI (cli.js).
 
 /**
@@ -150,4 +148,4 @@ const pixelsToColumns = (pixels, grid) => {
 	};
 };
 
-module.exports = { span, gutter, margin, pixelsToColumns };
+export { span, gutter, margin, pixelsToColumns };
