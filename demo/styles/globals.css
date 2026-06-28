@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Grid theme + plugins (fluid layout system, typography) live in JS config. */
+@config "../tailwind.config.js";
+
+/* MDX/JSX sources to scan for utility classes. */
+@source "../pages";
+@source "../components";
+@source "../hooks";

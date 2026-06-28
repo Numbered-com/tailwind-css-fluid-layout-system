@@ -4,13 +4,30 @@ An unofficial [Tailwind](https://tailwindcss.com/) plugin that eases fluid, resp
 
 ## Installation
 
+Requires **Tailwind CSS v4**.
+
 ```bash
-pnpm add -D @numbered/tailwind-fluid-layout-system
-# or
 bun add -D @numbered/tailwind-fluid-layout-system
+# or
+pnpm add -D @numbered/tailwind-fluid-layout-system
 ```
 
-Import and configure the plugin in your Tailwind config:
+Enable Tailwind's PostCSS plugin:
+
+```js
+// postcss.config.js
+export default {
+  plugins: { '@tailwindcss/postcss': {} },
+}
+```
+
+The grid is configured in JavaScript — the `theme.grid` object and the plugin options — so load a config file from your CSS entry with `@config`:
+
+```css
+/* app.css */
+@import 'tailwindcss';
+@config './tailwind.config.js';
+```
 
 ```js
 // tailwind.config.js

@@ -157,13 +157,13 @@ const matchUtilitiesFor = (key, fn, matchUtilities, values) => {
 				[`${key}-${utility}`]: (value) => {
 					return Array.isArray(element)
 						? element.reduce((result, item) => {
-								result[item] = `${fn(value)}`;
+								result[item] = `${value}`;
 								return result;
 							}, {})
-						: { [element]: `${fn(value)}` };
+						: { [element]: `${value}` };
 				},
 			},
-			{ values },
+			{ values, supportsNegativeValues: true },
 		);
 	}
 };
@@ -294,27 +294,29 @@ const grid = plugin.withOptions(
 					entry[1].columns >= max[1].columns ? entry : max,
 				)?.[1].columns ?? 0;
 
-			const getValues = (withExpansion = false) => {
+			// Precompute the final CSS value for each positive key. Negatives are
+			// handled by Tailwind's `supportsNegativeValues`, which wraps the value
+			// in `calc(<value> * -1)` — so the value must be a ready calc string,
+			// not a number/instruction our math fns would re-parse (v4 would feed
+			// span() "calc(3 * -1)" and get NaN).
+			const getValues = (fn, withExpansion = false) => {
 				const values = {};
 				new Array(maxColumns).fill(null).forEach((v, i) => {
 					const j = i + 1;
 
-					values[-j] = -j;
-					values[j] = j;
+					values[j] = fn(j);
 
 					if (withExpansion) {
-						values[`${-j}-wide`] = `${-j} wide`;
-						values[`${-j}-wider`] = `${-j} wider`;
-						values[`${j}-wide`] = `${j} wide`;
-						values[`${j}-wider`] = `${j} wider`;
+						values[`${j}-wide`] = fn(`${j} wide`);
+						values[`${j}-wider`] = fn(`${j} wider`);
 					}
 				});
 				return values;
 			};
 
-			matchUtilitiesFor("span", span, matchUtilities, getValues(true));
-			matchUtilitiesFor("gutter", gutter, matchUtilities, getValues());
-			matchUtilitiesFor("margin", margin, matchUtilities, getValues());
+			matchUtilitiesFor("span", span, matchUtilities, getValues(span, true));
+			matchUtilitiesFor("gutter", gutter, matchUtilities, getValues(gutter));
+			matchUtilitiesFor("margin", margin, matchUtilities, getValues(margin));
 
 			// guidelines
 

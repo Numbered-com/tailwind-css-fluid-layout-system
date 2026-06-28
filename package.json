@@ -1,6 +1,6 @@
 {
 	"name": "@numbered/tailwind-fluid-layout-system",
-	"version": "0.9.2",
+	"version": "1.0.0",
 	"description": "A Tailwind CSS plugin to fluidify layout.",
 	"type": "module",
 	"main": "src/index.js",
@@ -12,8 +12,7 @@
 		"px-to-cols": "./src/cli.js"
 	},
 	"files": [
-		"src/*.js",
-		"dist/"
+		"src/*.js"
 	],
 	"repository": {
 		"type": "git",
@@ -26,40 +25,24 @@
 	"scripts": {
 		"dev": "next dev demo",
 		"build": "next build demo",
-		"export": "next export demo",
 		"start": "next start demo",
 		"patch": "npm version patch --force && npm publish",
 		"minor": "npm version minor --force && npm publish",
 		"major": "npm version major --force && npm publish"
 	},
 	"peerDependencies": {
-		"tailwindcss": ">=3.0.0 || insiders"
+		"tailwindcss": ">=4.0.0"
 	},
 	"devDependencies": {
-		"@mdx-js/loader": "^3.1.0",
-		"@mdx-js/mdx": "^3.1.0",
-		"@next/mdx": "^15.4.6",
-		"@tailwindcss/typography": "^0.5.16",
-		"autoprefixer": "^10.4.21",
-		"highlight.js": "^11.11.1",
-		"jest": "^30.0.5",
-		"jest-diff": "^30.0.5",
-		"next": "^15.4.6",
-		"postcss": "^8.5.6",
-		"prettier": "^3.6.2",
-		"react": "^19.1.1",
-		"react-dom": "^19.1.1",
-		"tailwindcss": "^3.4.17"
-	},
-	"dependencies": {
-		"@mdx-js/react": "^3.1.0",
-		"lodash.castarray": "^4.4.0",
-		"lodash.isplainobject": "^4.0.6",
-		"lodash.merge": "^4.6.2"
-	},
-	"jest": {
-		"setupFilesAfterEnv": [
-			"<rootDir>/jest/customMatchers.js"
-		]
+		"@mdx-js/loader": "^3.1.1",
+		"@next/mdx": "^16.2.9",
+		"@tailwindcss/postcss": "^4.3.1",
+		"@tailwindcss/typography": "^0.5.20",
+		"next": "^16.2.9",
+		"postcss": "^8.5.16",
+		"prettier": "^3.9.1",
+		"react": "^19.2.7",
+		"react-dom": "^19.2.7",
+		"tailwindcss": "^4.3.1"
 	}
 }

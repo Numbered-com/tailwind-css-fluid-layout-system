@@ -1,10 +1,7 @@
 import fls from '../src/index.js'
 import typography from '@tailwindcss/typography'
-import * as mdx from '@mdx-js/mdx'
 
 export default {
-  content: ['./demo/**/*.{js,mdx}'],
-  transform: { mdx: content => mdx.sync(content) },
   theme: {
     grid: {
       mobile: { columns: 6, gutter: 0.1, margin: 10, mockupWidth: 375, fontScalingMaxWidth: 500 },
@@ -20,7 +17,6 @@ export default {
       }
     }
   },
-  variants: {},
   plugins: [
     typography,
     fls({

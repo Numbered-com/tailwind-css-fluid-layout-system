@@ -1,4 +1,4 @@
-import 'tailwindcss/tailwind.css'
+import '../styles/globals.css'
 import useGridControls from '../hooks/useGridControls'
 
 export default function App({ Component, pageProps }) {
