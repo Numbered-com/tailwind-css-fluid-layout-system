@@ -1,6 +1,6 @@
 {
 	"name": "@numbered/tailwind-fluid-layout-system",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "A Tailwind CSS plugin to fluidify layout.",
 	"type": "module",
 	"main": "src/index.js",
@@ -23,6 +23,7 @@
 		"access": "public"
 	},
 	"scripts": {
+		"test": "bun test",
 		"dev": "next dev demo",
 		"build": "next build demo",
 		"start": "next start demo",
