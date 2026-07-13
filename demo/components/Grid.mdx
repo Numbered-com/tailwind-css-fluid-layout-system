@@ -59,3 +59,21 @@ Use the <code>margin</code> utility to get outter margins if needed.
 <div className="flex text-black text-sm text-center h-20 relative">
 	<div className="bg-red-300 flex justify-center items-center h-20 span-mr-2-wide margin-w-1 absolute right-full">margin-w-1</div>
 </div>
+
+## Arbitrary values
+
+Every utility takes an arbitrary value, so a count doesn't have to be a whole number. It stays a multiplier of the grid: <code>span-w-[0.5]</code> resolves to <code>calc(0.5 \* var(--column) - 0.5 \* var(--gutter))</code>, never to <code>0.5px</code>.
+
+<div className="flex flex-col text-black text-sm text-center">
+	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-[0.5]">span-w-[0.5]</div>
+	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-1">span-w-1</div>
+	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-[1.5]">span-w-[1.5]</div>
+	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2">span-w-2</div>
+</div>
+
+Spreading instructions work too, with an underscore standing in for the space.
+
+<div className="flex flex-col text-black text-sm text-center">
+	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-[1.5]">span-w-[1.5]</div>
+	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-[1.5_wide]">span-w-[1.5_wide]</div>
+</div>

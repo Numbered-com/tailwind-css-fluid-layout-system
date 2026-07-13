@@ -148,6 +148,19 @@ const parseScreen = (screen) => {
 	}
 };
 
+// Tailwind negates a utility by wrapping the resolved value: `calc(<value> * -1)`.
+// Our values are grid instructions (`3`, `3 wide`), not CSS, so unwrap the
+// negation and fold the sign into the count before the math fns parse it.
+const negated = /^calc\((.+) \* -1\)$/;
+
+const resolveValue = (fn, value) => {
+	const match = `${value}`.match(negated);
+	if (!match) return fn(value);
+
+	const [count, spreading] = match[1].split(" ");
+	return fn(spreading ? `-${count} ${spreading}` : -parseFloat(count));
+};
+
 const matchUtilitiesFor = (key, fn, matchUtilities, values) => {
 	for (const utility in utilities) {
 		const element = utilities[utility];
@@ -155,12 +168,14 @@ const matchUtilitiesFor = (key, fn, matchUtilities, values) => {
 		matchUtilities(
 			{
 				[`${key}-${utility}`]: (value) => {
+					const resolved = `${resolveValue(fn, value)}`;
+
 					return Array.isArray(element)
 						? element.reduce((result, item) => {
-								result[item] = `${value}`;
+								result[item] = resolved;
 								return result;
 							}, {})
-						: { [element]: `${value}` };
+						: { [element]: resolved };
 				},
 			},
 			{ values, supportsNegativeValues: true },
@@ -294,29 +309,27 @@ const grid = plugin.withOptions(
 					entry[1].columns >= max[1].columns ? entry : max,
 				)?.[1].columns ?? 0;
 
-			// Precompute the final CSS value for each positive key. Negatives are
-			// handled by Tailwind's `supportsNegativeValues`, which wraps the value
-			// in `calc(<value> * -1)` — so the value must be a ready calc string,
-			// not a number/instruction our math fns would re-parse (v4 would feed
-			// span() "calc(3 * -1)" and get NaN).
-			const getValues = (fn, withExpansion = false) => {
+			// Values stay grid instructions, not CSS: the utility callback runs them
+			// through the math fns, so arbitrary values (`span-w-[0.665]`) take the
+			// exact same path as named ones.
+			const getValues = (withExpansion = false) => {
 				const values = {};
 				new Array(maxColumns).fill(null).forEach((v, i) => {
 					const j = i + 1;
 
-					values[j] = fn(j);
+					values[j] = j;
 
 					if (withExpansion) {
-						values[`${j}-wide`] = fn(`${j} wide`);
-						values[`${j}-wider`] = fn(`${j} wider`);
+						values[`${j}-wide`] = `${j} wide`;
+						values[`${j}-wider`] = `${j} wider`;
 					}
 				});
 				return values;
 			};
 
-			matchUtilitiesFor("span", span, matchUtilities, getValues(span, true));
-			matchUtilitiesFor("gutter", gutter, matchUtilities, getValues(gutter));
-			matchUtilitiesFor("margin", margin, matchUtilities, getValues(margin));
+			matchUtilitiesFor("span", span, matchUtilities, getValues(true));
+			matchUtilitiesFor("gutter", gutter, matchUtilities, getValues());
+			matchUtilitiesFor("margin", margin, matchUtilities, getValues());
 
 			// guidelines
 
