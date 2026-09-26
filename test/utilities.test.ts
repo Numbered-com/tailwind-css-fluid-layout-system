@@ -178,6 +178,22 @@ describe("span values", () => {
 		);
 	});
 
+	test("a bare fractional span works like its arbitrary form", async () => {
+		expect(await declarations("span-w-6.5")).toBe(
+			"width: calc(6.5 * var(--column) + 6 * var(--gutter));",
+		);
+		expect(await declarations("span-w-6.5-wide")).toBe(
+			"width: calc(6.5 * var(--column) + 7 * var(--gutter));",
+		);
+	});
+
+	test("a bare fractional gutter and its negation", async () => {
+		expect(await declarations("gutter-gap-0.5")).toBe("gap: calc(0.5 * var(--gutter));");
+		expect(await declarations("-gutter-mt-0.5")).toBe(
+			"margin-top: calc(-0.5 * var(--gutter));",
+		);
+	});
+
 	test("an arbitrary value beyond the grid is not clamped", async () => {
 		expect(await declarations("span-w-[16]")).toBe(
 			"width: calc(16 * var(--column) + 15 * var(--gutter));",
@@ -250,6 +266,15 @@ describe("negated values mirror their positive counterpart", () => {
 describe("unsupported values produce no CSS", () => {
 	test("a span past the widest grid has no named utility", async () => {
 		expect(await declarations("span-w-13")).toBeUndefined();
+	});
+
+	test("a bare span past the widest grid has no utility either", async () => {
+		expect(await declarations("span-w-12.5")).toBeUndefined();
+	});
+
+	test("a bare value with a misplaced or unknown spreading is rejected", async () => {
+		expect(await declarations("gutter-gap-2-wide")).toBeUndefined();
+		expect(await declarations("span-w-2.5-widest")).toBeUndefined();
 	});
 
 	test("an unknown spreading instruction is rejected", async () => {

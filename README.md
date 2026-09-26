@@ -97,6 +97,8 @@ Three prefixes turn any Tailwind spacing or sizing utility into a grid value, wr
 <div className="margin-pl-1">left padding of 1 grid margin</div>
 ```
 
+Sizes can be fractional, written bare or as arbitrary values: `gutter-gap-0.5`, `span-w-6.5`, `span-w-6.5-wide`, `span-w-[0.665]`. Bare sizes go up to the widest grid's column count; use brackets beyond it (`span-w-[16]`).
+
 Every utility below works with all three prefixes:
 
 | Tailwind utility | `span-` (+ `-wide`/`-wider`) | `gutter-` | `margin-` |

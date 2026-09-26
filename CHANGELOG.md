@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `scrollbarWidth` option to set `--sbw` on fine pointers (defaults to `17px`; use `0px` for overlay scrollbars).
 - `metrics(grid)` and `spreadings` exports from `grid-math`: pixel grid width, gutter and column; the gutters each `wide`/`wider` adds.
+- Bare fractional values: `gutter-gap-0.5`, `span-w-6.5`, `span-w-6.5-wide` work like their bracketed forms, up to the widest grid's column count.
 
 ### Changed
 

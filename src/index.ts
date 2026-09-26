@@ -172,8 +172,20 @@ const matchUtilitiesFor = (
 	key: string,
 	fn: GridFn,
 	matchUtilities: PluginAPI["matchUtilities"],
-	values: Record<string, string>,
-) =>
+	maxColumns: number,
+) => {
+	// Values stay grid instructions, not CSS: the utility callback runs them
+	// through the math fns, so named (`span-w-3-wide`), bare (`gutter-gap-0.5`,
+	// `span-w-6.5-wide`) and arbitrary (`span-w-[0.665]`) values take the same
+	// path. Named values feed autocomplete; bare ones stop at the widest grid too.
+	const counts = Array.from({ length: maxColumns }, (_, i) => `${i + 1}`);
+	const suffixes = key === "span" ? ["", ...Object.keys(spreadings)] : [""];
+	const values = Object.fromEntries(
+		counts.flatMap((n) => suffixes.map((s) => [s ? `${n}-${s}` : n, `${n} ${s}`.trim()])),
+	);
+	const bare = ({ value }: { value: string }) =>
+		parseFloat(value) <= maxColumns ? value.replace("-", " ") : undefined;
+
 	matchUtilities(
 		Object.fromEntries(
 			Object.entries(utilities).map(([utility, properties]) => [
@@ -184,8 +196,9 @@ const matchUtilitiesFor = (
 				},
 			]),
 		),
-		{ values, supportsNegativeValues: true },
+		{ values: Object.assign({ __BARE_VALUE__: bare }, values), supportsNegativeValues: true },
 	);
+};
 
 const grid: FluidLayoutPlugin = plugin.withOptions<Options>(
 	(options) => {
@@ -249,21 +262,9 @@ const grid: FluidLayoutPlugin = plugin.withOptions<Options>(
 
 			const maxColumns = Math.max(...Object.values(grids).map((g) => g.columns));
 
-			// Values stay grid instructions, not CSS: the utility callback runs them
-			// through the math fns, so arbitrary values (`span-w-[0.665]`) take the
-			// exact same path as named ones.
-			const counts = Array.from({ length: maxColumns }, (_, i) => `${i + 1}`);
-			const values = Object.fromEntries(counts.map((n) => [n, n]));
-			const spanValues = {
-				...values,
-				...Object.fromEntries(
-					counts.flatMap((n) => Object.keys(spreadings).map((s) => [`${n}-${s}`, `${n} ${s}`])),
-				),
-			};
-
-			matchUtilitiesFor("span", span, matchUtilities, spanValues);
-			matchUtilitiesFor("gutter", gutter, matchUtilities, values);
-			matchUtilitiesFor("margin", margin, matchUtilities, values);
+			matchUtilitiesFor("span", span, matchUtilities, maxColumns);
+			matchUtilitiesFor("gutter", gutter, matchUtilities, maxColumns);
+			matchUtilitiesFor("margin", margin, matchUtilities, maxColumns);
 
 			// guidelines
 
