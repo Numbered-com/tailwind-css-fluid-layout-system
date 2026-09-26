@@ -1,33 +1,33 @@
 import { useEffect, useRef } from 'react'
 
+export const toggleGrid = () => {
+  const visibility = localStorage.getItem('guidelinesVisibility') === 'hidden' ? 'inherit' : 'hidden'
+  localStorage.setItem('guidelinesVisibility', visibility)
+  document.body.style.setProperty('--guidelines-visibility', visibility)
+}
+
 const useGridControls = () => {
   const keyPressed = useRef(false)
 
-  const handleKeypress = e => {
+  const handleKeypress = (e: KeyboardEvent) => {
     if (e.key == 'g' && e.ctrlKey && !keyPressed.current) {
       keyPressed.current = true
       toggleGrid()
     }
   }
 
-  const handleKeyup = e => {
+  const handleKeyup = (e: KeyboardEvent) => {
     if (e.key == 'g') {
       keyPressed.current = false
     }
   }
 
-  const toggleGrid = () => {
-    const visibility = localStorage.getItem('guidelinesVisibility') === 'inherit' ? 'hidden' : 'inherit'
-    localStorage.setItem('guidelinesVisibility', visibility)
-    document.body.style.setProperty('--guidelines-visibility', visibility)
-  }
-
   useEffect(() => {
-    if (!localStorage.getItem('guidelinesVisibility')) {
+    if (!localStorage.getItem('guidelinesVisibility')!) {
       localStorage.setItem('guidelinesVisibility', 'inherit')
     }
 
-    document.body.style.setProperty('--guidelines-visibility', localStorage.getItem('guidelinesVisibility'))
+    document.body.style.setProperty('--guidelines-visibility', localStorage.getItem('guidelinesVisibility')!)
 
     window.addEventListener('keypress', handleKeypress)
     window.addEventListener('keyup', handleKeyup)
