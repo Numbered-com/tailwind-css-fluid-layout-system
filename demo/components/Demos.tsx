@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { span, gutter, margin } from '../../src/grid-math.js'
+import { span, gutter, margin } from '../../src/grid-math.ts'
 import grids, { type Grid } from '../grid'
 
 const screens: Record<string, number> = { md: 768, lg: 1024 }

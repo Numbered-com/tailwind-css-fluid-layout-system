@@ -3,16 +3,17 @@
 	"version": "1.0.2",
 	"description": "A Tailwind CSS plugin to fluidify layout.",
 	"type": "module",
-	"main": "src/index.js",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"exports": {
-		".": "./src/index.js",
-		"./grid-math": "./src/grid-math.js"
+		".": "./dist/index.js",
+		"./grid-math": "./dist/grid-math.js"
 	},
 	"bin": {
-		"px-to-cols": "./src/cli.js"
+		"px-to-cols": "./dist/cli.js"
 	},
 	"files": [
-		"src/*.js"
+		"dist"
 	],
 	"repository": {
 		"type": "git",
@@ -27,6 +28,7 @@
 		"dev": "next dev demo",
 		"build": "next build demo",
 		"start": "next start demo",
+		"prepublishOnly": "tsc",
 		"patch": "npm version patch --force && npm publish",
 		"minor": "npm version minor --force && npm publish",
 		"major": "npm version major --force && npm publish"

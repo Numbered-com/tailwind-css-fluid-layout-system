@@ -3,18 +3,23 @@ import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { compile } from "tailwindcss";
+import { gutter, pixelsToColumns } from "../src/grid-math.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 // Compile classes through Tailwind itself, so the utilities are exercised the
 // same way an app does: named values, arbitrary values and negation all go
 // through Tailwind's candidate parsing before reaching the plugin.
-const css = async (classes) => {
+const css = async (
+	classes: string[],
+	pluginOptions = "",
+	source = `@plugin "${root}/src/index.ts" ${pluginOptions};`,
+) => {
 	const compiler = await compile(
-		`@import "tailwindcss";\n@plugin "${root}/src/index.js";`,
+		`@import "tailwindcss";\n${source}`,
 		{
 			base: root,
-			async loadStylesheet(id, base) {
+			async loadStylesheet(id) {
 				const path = resolve(root, "node_modules", id, "index.css");
 				return {
 					path,
@@ -23,7 +28,7 @@ const css = async (classes) => {
 				};
 			},
 			async loadModule(id, base) {
-				return { path: id, base, module: (await import(id)).default };
+				return { path: id, base, module: (await import(resolve(base, id))).default };
 			},
 		},
 	);
@@ -34,7 +39,7 @@ const css = async (classes) => {
 // The declarations of a single utility, e.g. `.span-w-3 { width: … }` → `width: …`.
 // Tailwind escapes selector specials (`.span-w-\[0\.665\]`), so drop the
 // backslashes and match against the class as authored.
-const declarations = async (className) => {
+const declarations = async (className: string) => {
 	const out = (await css([className])).replaceAll("\\", "");
 	const escaped = className.replace(/[.*+?^${}()|[\]]/g, "\\$&");
 	const rule = out.match(new RegExp(`\\.${escaped}\\s*\\{([^}]*)\\}`));
@@ -100,7 +105,7 @@ const properties = {
 	"border-y": ["border-top-width", "border-bottom-width"],
 };
 
-const rule = (props, value) =>
+const rule = (props: string[], value: string) =>
 	props.map((property) => `${property}: ${value};`).join(" ");
 
 // Each grid key, and the value a `-2` utility must produce for it.
@@ -157,13 +162,35 @@ describe("span values", () => {
 	test("an arbitrary value is a column multiplier, not a raw length", async () => {
 		// Regression: v1.0.0 emitted `width: 0.665`, read by browsers as a length.
 		expect(await declarations("span-w-[0.665]")).toBe(
-			"width: calc(0.665 * var(--column) - 0.335 * var(--gutter));",
+			"width: calc(0.665 * var(--column) + 0 * var(--gutter));",
+		);
+	});
+
+	test("a fractional span includes the gutter before its partial column", async () => {
+		expect(await declarations("span-w-[6.5]")).toBe(
+			"width: calc(6.5 * var(--column) + 6 * var(--gutter));",
 		);
 	});
 
 	test("an arbitrary value carries a spreading instruction", async () => {
 		expect(await declarations("span-w-[2_wide]")).toBe(
 			"width: calc(2 * var(--column) + 2 * var(--gutter));",
+		);
+	});
+
+	test("a bare fractional span works like its arbitrary form", async () => {
+		expect(await declarations("span-w-6.5")).toBe(
+			"width: calc(6.5 * var(--column) + 6 * var(--gutter));",
+		);
+		expect(await declarations("span-w-6.5-wide")).toBe(
+			"width: calc(6.5 * var(--column) + 7 * var(--gutter));",
+		);
+	});
+
+	test("a bare fractional gutter and its negation", async () => {
+		expect(await declarations("gutter-gap-0.5")).toBe("gap: calc(0.5 * var(--gutter));");
+		expect(await declarations("-gutter-mt-0.5")).toBe(
+			"margin-top: calc(-0.5 * var(--gutter));",
 		);
 	});
 
@@ -217,9 +244,9 @@ describe("negated values mirror their positive counterpart", () => {
 		);
 	});
 
-	test("a negative arbitrary span is a negative column multiplier", async () => {
-		expect(await declarations("-span-ml-[0.665]")).toBe(
-			"margin-left: calc(-0.665 * var(--column) + 0.335 * var(--gutter));",
+	test("a negative fractional span negates its crossed gutters", async () => {
+		expect(await declarations("-span-ml-[6.5]")).toBe(
+			"margin-left: calc(-6.5 * var(--column) - 6 * var(--gutter));",
 		);
 	});
 
@@ -241,8 +268,58 @@ describe("unsupported values produce no CSS", () => {
 		expect(await declarations("span-w-13")).toBeUndefined();
 	});
 
+	test("a bare span past the widest grid has no utility either", async () => {
+		expect(await declarations("span-w-12.5")).toBeUndefined();
+	});
+
+	test("a bare value with a misplaced or unknown spreading is rejected", async () => {
+		expect(await declarations("gutter-gap-2-wide")).toBeUndefined();
+		expect(await declarations("span-w-2.5-widest")).toBeUndefined();
+	});
+
 	test("an unknown spreading instruction is rejected", async () => {
 		expect(await declarations("span-w-3-widest")).toBeUndefined();
+	});
+
+	test("an arbitrary value that isn't a count is rejected", async () => {
+		for (const className of ["span-w-[foo]", "gutter-w-[abc]", "margin-w-[1px]"])
+			expect(await declarations(className)).toBeUndefined();
+	});
+
+	test("an unknown or misplaced spreading instruction is rejected", async () => {
+		expect(await declarations("span-w-[3_widest]")).toBeUndefined();
+		expect(await declarations("gutter-w-[2_wide]")).toBeUndefined();
+	});
+});
+
+describe("base variables", () => {
+	test("the maxWidth cap meets the fluid value, so the grid doesn't jump", async () => {
+		// Default desktop grid: 1440px mockup, 60px margins, capped at 1920px.
+		const out = await css([]);
+		const [, coefficient, cap] = out.match(
+			/--grid-width: min\(calc\(([\d.]+)vw - var\(--sbw\) \* [\d.]+\), ([\d.]+)px\)/,
+		)!;
+
+		expect(Math.abs((+coefficient / 100) * 1920 - +cap)).toBeLessThan(0.01);
+	});
+
+	test("the scrollbar width is declared once", async () => {
+		expect((await css([])).split("--sbw: 0px").length - 1).toBe(1);
+	});
+
+	test("a hex guideline colour is encoded into the data URL", async () => {
+		const out = await css([], '{ guidelines: true; color: "#ff0000"; }');
+
+		expect(out).toContain('fill="%23ff0000"');
+	});
+
+	test("every Tailwind screen shape becomes the grid's media query", async () => {
+		const out = await css([], "", '@config "./test/screens.config.ts";');
+
+		expect(out).toContain("@media (min-width: 40rem) and (max-width: 60rem)");
+		expect(out).toContain("@media print");
+		expect(out).toContain("@media (max-width: 30rem), (min-width: 80rem)");
+		expect(out).not.toContain("@media ()");
 	});
 });
 
@@ -251,8 +328,35 @@ describe("variants", () => {
 		const out = await css(["lg:span-w-[0.665]"]);
 
 		expect(out).toContain(
-			"calc(0.665 * var(--column) - 0.335 * var(--gutter))",
+			"calc(0.665 * var(--column) + 0 * var(--gutter))",
 		);
 		expect(out).not.toContain("width: 0.665;");
+	});
+});
+
+describe("grid math", () => {
+	test("gutter() resolves a ratio gutter to px", () => {
+		// 1000px grid, 10 columns, gutter ratio 0.1 → 10px per gutter.
+		expect(gutter(2, { columns: 10, mockupWidth: 1000, gutter: 0.1 })).toBe(20);
+	});
+});
+
+describe("pixelsToColumns", () => {
+	// 24 cols on 1440 with 24px gutter/margin: column 35, gutter 24.
+	const grid = { columns: 24, mockupWidth: 1440, gutter: 24, margin: 24 };
+	const className = (px: number) => pixelsToColumns(px, grid).className;
+
+	test("sub-gutter values map to gutter gaps", () => {
+		expect(className(12)).toBe("gutter-gap-0.5");
+		expect(className(24)).toBe("gutter-gap-1");
+	});
+
+	test("values between a gutter and a column pick whichever is closer", () => {
+		expect(className(30)).toBe("span-w-1");
+	});
+
+	test("values wider than a gutter align to columns, not gutter multiples", () => {
+		expect(className(48)).toBe("span-w-1-wide");
+		expect(className(96)).toBe("span-w-2");
 	});
 });

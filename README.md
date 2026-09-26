@@ -97,6 +97,8 @@ Three prefixes turn any Tailwind spacing or sizing utility into a grid value, wr
 <div className="margin-pl-1">left padding of 1 grid margin</div>
 ```
 
+Sizes can be fractional, written bare or as arbitrary values: `gutter-gap-0.5`, `span-w-6.5`, `span-w-6.5-wide`, `span-w-[0.665]`. Bare sizes go up to the widest grid's column count; use brackets beyond it (`span-w-[16]`).
+
 Every utility below works with all three prefixes:
 
 | Tailwind utility | `span-` (+ `-wide`/`-wider`) | `gutter-` | `margin-` |
@@ -136,7 +138,7 @@ All plugin utilities support Tailwind's responsive prefixes (`sm:`, `md:`, `lg:`
 
 #### Scrollbar Width
 
-Grid calculations use the `--sbw` CSS variable to account for scrollbar width. Unfortunately, dynamically determining this value in CSS alone is not reliable in 2025. By default, `--sbw` is set to 17px for desktop environments (`@media (pointer: fine)`), regardless of whether a scrollbar is actually visible. For more accurate results, you can set this value programmatically using JavaScript.
+Grid calculations use the `--sbw` CSS variable to account for scrollbar width. Unfortunately, dynamically determining this value in CSS alone is not reliable in 2025. By default, `--sbw` is set to 17px for desktop environments (`@media (pointer: fine)`), regardless of whether a scrollbar is actually visible. Set the `scrollbarWidth` option (e.g. `'0px'` when your audience uses overlay scrollbars, as on macOS), or set `--sbw` programmatically using JavaScript for exact results.
 
 ### Plugin Options
 
@@ -146,6 +148,7 @@ Grid calculations use the `--sbw` CSS variable to account for scrollbar width. U
 | `guidelines` | `boolean` | Enable/disable guidelines (defaults to `true` in development) |
 | `guidelinesSelector` | `string` | CSS selector for the guidelines container (defaults to `'body'`) |
 | `fluidUnit` | `function` | Custom function to compute fluid CSS units |
+| `scrollbarWidth` | `string` | `--sbw` value on fine pointers (defaults to `'17px'`) |
 
 #### Guidelines Selector
 

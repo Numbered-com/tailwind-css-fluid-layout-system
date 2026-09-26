@@ -1,4 +1,4 @@
-import fls from '../src/index.js'
+import fls from '../src/index.ts'
 import grid from './grid'
 import typography from '@tailwindcss/typography'
 
