@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Source migrated to TypeScript; the package now ships compiled `dist/` JS with `.d.ts` typings (built by `tsc` on `prepublishOnly`). Exported types: `Grid`, `PixelsToColumnsResult`.
 - `span()`, `gutter()` and `margin()` throw on invalid instructions (`span("foo")`, `gutter("2 wide")`) instead of returning `calc(NaN …)`.
 - Guideline overlay SVG positions are rounded to 6 significant digits, shrinking the generated CSS.
+- `pixelsToColumns` / `px-to-cols` pick from spans plus `gutter-gap-0.5`/`gutter-gap-1` in one pool: values near a column no longer snap to gutter multiples (`34px` → `span-w-1`, not `gutter-gap-1.5`), and wide values always align to columns.
 
 ### Fixed
 

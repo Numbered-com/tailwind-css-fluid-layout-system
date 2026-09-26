@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { compile } from "tailwindcss";
-import { gutter } from "../src/grid-math.ts";
+import { gutter, pixelsToColumns } from "../src/grid-math.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -338,5 +338,25 @@ describe("grid math", () => {
 	test("gutter() resolves a ratio gutter to px", () => {
 		// 1000px grid, 10 columns, gutter ratio 0.1 → 10px per gutter.
 		expect(gutter(2, { columns: 10, mockupWidth: 1000, gutter: 0.1 })).toBe(20);
+	});
+});
+
+describe("pixelsToColumns", () => {
+	// 24 cols on 1440 with 24px gutter/margin: column 35, gutter 24.
+	const grid = { columns: 24, mockupWidth: 1440, gutter: 24, margin: 24 };
+	const className = (px: number) => pixelsToColumns(px, grid).className;
+
+	test("sub-gutter values map to gutter gaps", () => {
+		expect(className(12)).toBe("gutter-gap-0.5");
+		expect(className(24)).toBe("gutter-gap-1");
+	});
+
+	test("values between a gutter and a column pick whichever is closer", () => {
+		expect(className(30)).toBe("span-w-1");
+	});
+
+	test("values wider than a gutter align to columns, not gutter multiples", () => {
+		expect(className(48)).toBe("span-w-1-wide");
+		expect(className(96)).toBe("span-w-2");
 	});
 });

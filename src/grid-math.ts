@@ -96,7 +96,7 @@ export type PixelsToColumnsResult = {
 
 /**
  * Pixels → columns: the inverse of span(). Gutter and margin are in px.
- * Finds the closest grid span (or gutter multiple for sub-column values).
+ * Finds the closest span, or gutter gap (≤ 1 gutter) for small spacing.
  */
 const pixelsToColumns = (
 	pixels: number,
@@ -114,41 +114,24 @@ const pixelsToColumns = (
 		contentWidth: Math.round(contentWidth),
 	};
 
-	// First candidate closest to the target wins ties.
-	const closest = <T extends { width: number }>(candidates: T[]) =>
-		candidates.reduce((best, c) =>
-			Math.abs(c.width - pixels) < Math.abs(best.width - pixels) ? c : best,
-		);
-
-	// Sub-column values: match against gutter multiples.
-	if (pixels < columnWidth) {
-		const best = closest(
-			[0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6].map((mult) => ({ mult, width: gutterPx * mult })),
-		);
-		return {
-			className: `gutter-gap-${best.mult}`,
-			columns: 0,
-			gutters: best.mult,
-			actualWidth: Math.round(best.width),
-			pixelDifference: Math.round(best.width - pixels),
-			gridConfig,
-		};
-	}
-
-	// Whole-column spans, with optional spreading.
-	const best = closest(
-		Array.from({ length: columns }, (_, i) => i + 1).flatMap((n) =>
+	// One pool: sub-gutter spacing (≤ 1 gutter) plus every span; the closest
+	// wins, first on ties. Wider values are meant to align with columns.
+	const best = [
+		...[0.5, 1].map((gutters) => ({ className: `gutter-gap-${gutters}`, columns: 0, gutters, width: gutters * gutterPx })),
+		...Array.from({ length: columns }, (_, i) => i + 1).flatMap((n) =>
 			["", ...Object.keys(spreadings)].map((s) => ({
+				className: `span-w-${n}${s && `-${s}`}`,
 				columns: n,
-				suffix: s && `-${s}`,
+				gutters: undefined,
 				width: span(`${n} ${s}`.trim(), grid),
 			})),
 		),
-	);
+	].reduce((best, c) => (Math.abs(c.width - pixels) < Math.abs(best.width - pixels) ? c : best));
 
 	return {
-		className: `span-w-${best.columns}${best.suffix}`,
+		className: best.className,
 		columns: best.columns,
+		...(best.gutters !== undefined && { gutters: best.gutters }),
 		actualWidth: Math.round(best.width),
 		pixelDifference: Math.round(best.width - pixels),
 		gridConfig,
