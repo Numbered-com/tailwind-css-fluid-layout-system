@@ -27,7 +27,7 @@ jobs:
 
       - name: Publish to npm
         run: |
-          if npm view "$(node -p 'require("./package.json").name')@${GITHUB_REF_NAME#v}" version | grep -q .; then
+          if npm view "$(node -p 'require("./package.json").name')@${GITHUB_REF_NAME#v}" version 2>/dev/null | grep -q .; then
             echo "Already on npm, skipping"
           else
             npm publish

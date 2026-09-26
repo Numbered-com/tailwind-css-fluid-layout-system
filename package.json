@@ -10,7 +10,7 @@
 		"./grid-math": "./dist/grid-math.js"
 	},
 	"bin": {
-		"px-to-cols": "./dist/cli.js"
+		"px-to-cols": "dist/cli.js"
 	},
 	"files": [
 		"dist"
