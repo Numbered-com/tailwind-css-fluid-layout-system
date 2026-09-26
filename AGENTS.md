@@ -1,0 +1,1 @@
+This is `@numbered/tailwind-fluid-layout-system`, a Tailwind CSS plugin that provides fluid, responsive layout utilities based on a configurable grid system. It generates CSS custom properties (`--column`, `--gutter`, `--margin`, `--grid-width`) that scale fluidly with viewport width.
