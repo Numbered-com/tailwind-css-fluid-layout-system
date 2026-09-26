@@ -1,10 +1,6 @@
 // Pure grid math — no Tailwind/runtime dependencies, so it can be imported by
 // both the plugin (index.js) and the standalone CLI (cli.js).
 
-// Fractional spans leak binary floats into the CSS (0.665 - 1 would emit
-// -0.33499999999999996), so trim the noise without touching real precision.
-const clean = (n) => +n.toPrecision(12);
-
 /**
  * Span
  * @return matching amount of columns including gutters
@@ -24,6 +20,10 @@ const span = (col = 1, grid = null) => {
 
 	if (count === 0) return 0;
 
+	// A fractional span fills part of the next column, so it crosses the gutter
+	// before it: 6.5 = 6 columns + 6 gutters + half a column.
+	const crossed = Math.sign(count) * (Math.ceil(Math.abs(count)) - 1);
+
 	if (grid) {
 		const gridWidth = grid.mockupWidth - 2 * grid.margin;
 		// gutter may be given as a px value (>= 1) or a ratio (< 1); resolve to px.
@@ -36,7 +36,7 @@ const span = (col = 1, grid = null) => {
 				: spreadingInstruction === "wider"
 					? gutter * 2
 					: 0;
-		return count * column + (count - 1) * gutter + spreading;
+		return count * column + crossed * gutter + spreading;
 	} else {
 		const spreading =
 			spreadingInstruction === "wide"
@@ -44,7 +44,7 @@ const span = (col = 1, grid = null) => {
 				: spreadingInstruction === "wider"
 					? 2
 					: 0;
-		const gutters = clean(count - (1 - spreading) * Math.sign(count));
+		const gutters = crossed + spreading * Math.sign(count);
 		const sign = gutters < 0 ? "-" : "+";
 
 		return `calc(${count} * var(--column) ${sign} ${Math.abs(gutters)} * var(--gutter))`;

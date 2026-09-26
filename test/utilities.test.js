@@ -157,7 +157,13 @@ describe("span values", () => {
 	test("an arbitrary value is a column multiplier, not a raw length", async () => {
 		// Regression: v1.0.0 emitted `width: 0.665`, read by browsers as a length.
 		expect(await declarations("span-w-[0.665]")).toBe(
-			"width: calc(0.665 * var(--column) - 0.335 * var(--gutter));",
+			"width: calc(0.665 * var(--column) + 0 * var(--gutter));",
+		);
+	});
+
+	test("a fractional span includes the gutter before its partial column", async () => {
+		expect(await declarations("span-w-[6.5]")).toBe(
+			"width: calc(6.5 * var(--column) + 6 * var(--gutter));",
 		);
 	});
 
@@ -217,9 +223,9 @@ describe("negated values mirror their positive counterpart", () => {
 		);
 	});
 
-	test("a negative arbitrary span is a negative column multiplier", async () => {
-		expect(await declarations("-span-ml-[0.665]")).toBe(
-			"margin-left: calc(-0.665 * var(--column) + 0.335 * var(--gutter));",
+	test("a negative fractional span negates its crossed gutters", async () => {
+		expect(await declarations("-span-ml-[6.5]")).toBe(
+			"margin-left: calc(-6.5 * var(--column) - 6 * var(--gutter));",
 		);
 	});
 
@@ -251,7 +257,7 @@ describe("variants", () => {
 		const out = await css(["lg:span-w-[0.665]"]);
 
 		expect(out).toContain(
-			"calc(0.665 * var(--column) - 0.335 * var(--gutter))",
+			"calc(0.665 * var(--column) + 0 * var(--gutter))",
 		);
 		expect(out).not.toContain("width: 0.665;");
 	});
