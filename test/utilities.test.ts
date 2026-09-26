@@ -10,12 +10,16 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 // Compile classes through Tailwind itself, so the utilities are exercised the
 // same way an app does: named values, arbitrary values and negation all go
 // through Tailwind's candidate parsing before reaching the plugin.
-const css = async (classes, pluginOptions = "") => {
+const css = async (
+	classes: string[],
+	pluginOptions = "",
+	source = `@plugin "${root}/src/index.ts" ${pluginOptions};`,
+) => {
 	const compiler = await compile(
-		`@import "tailwindcss";\n@plugin "${root}/src/index.ts" ${pluginOptions};`,
+		`@import "tailwindcss";\n${source}`,
 		{
 			base: root,
-			async loadStylesheet(id, base) {
+			async loadStylesheet(id) {
 				const path = resolve(root, "node_modules", id, "index.css");
 				return {
 					path,
@@ -24,7 +28,7 @@ const css = async (classes, pluginOptions = "") => {
 				};
 			},
 			async loadModule(id, base) {
-				return { path: id, base, module: (await import(id)).default };
+				return { path: id, base, module: (await import(resolve(base, id))).default };
 			},
 		},
 	);
@@ -35,7 +39,7 @@ const css = async (classes, pluginOptions = "") => {
 // The declarations of a single utility, e.g. `.span-w-3 { width: … }` → `width: …`.
 // Tailwind escapes selector specials (`.span-w-\[0\.665\]`), so drop the
 // backslashes and match against the class as authored.
-const declarations = async (className) => {
+const declarations = async (className: string) => {
 	const out = (await css([className])).replaceAll("\\", "");
 	const escaped = className.replace(/[.*+?^${}()|[\]]/g, "\\$&");
 	const rule = out.match(new RegExp(`\\.${escaped}\\s*\\{([^}]*)\\}`));
@@ -101,7 +105,7 @@ const properties = {
 	"border-y": ["border-top-width", "border-bottom-width"],
 };
 
-const rule = (props, value) =>
+const rule = (props: string[], value: string) =>
 	props.map((property) => `${property}: ${value};`).join(" ");
 
 // Each grid key, and the value a `-2` utility must produce for it.
@@ -269,9 +273,9 @@ describe("base variables", () => {
 		const out = await css([]);
 		const [, coefficient, cap] = out.match(
 			/--grid-width: min\(calc\(([\d.]+)vw - var\(--sbw\) \* [\d.]+\), ([\d.]+)px\)/,
-		);
+		)!;
 
-		expect(Math.abs((coefficient / 100) * 1920 - cap)).toBeLessThan(0.01);
+		expect(Math.abs((+coefficient / 100) * 1920 - +cap)).toBeLessThan(0.01);
 	});
 
 	test("the scrollbar width is declared once", async () => {
@@ -282,6 +286,15 @@ describe("base variables", () => {
 		const out = await css([], '{ guidelines: true; color: "#ff0000"; }');
 
 		expect(out).toContain('fill="%23ff0000"');
+	});
+
+	test("every Tailwind screen shape becomes the grid's media query", async () => {
+		const out = await css([], "", '@config "./test/screens.config.ts";');
+
+		expect(out).toContain("@media (min-width: 40rem) and (max-width: 60rem)");
+		expect(out).toContain("@media print");
+		expect(out).toContain("@media (max-width: 30rem), (min-width: 80rem)");
+		expect(out).not.toContain("@media ()");
 	});
 });
 

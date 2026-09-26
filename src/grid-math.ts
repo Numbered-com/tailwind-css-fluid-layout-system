@@ -23,35 +23,35 @@ const metrics = ({ columns, mockupWidth, gutter = 0, margin = 0 }: Grid): GridMe
 	return { gridWidth, gutter: gutterPx, column: (gridWidth - (columns - 1) * gutterPx) / columns };
 };
 
-const spreadings: Record<string, number> = { wide: 1, wider: 2 };
+/** Extra gutters each spreading instruction adds to a span. */
+const spreadings = { wide: 1, wider: 2 } as const;
+type Spreading = keyof typeof spreadings;
+
+const instruction = new RegExp(`^(-?\\d*\\.?\\d+)(?: (${Object.keys(spreadings).join("|")}))?$`);
+
+/** Parses a grid instruction (`3`, `-1.5`, `2 wide`); throws on anything else. */
+const parse = (value: number | string) => {
+	const match = `${value}`.match(instruction);
+	if (!match) throw new Error(`Invalid grid instruction "${value}"`);
+	return { count: +match[1], spreading: match[2] as Spreading | undefined };
+};
 
 /**
  * Span
  * @return matching amount of columns including gutters
- * @param col n | n-wide | n-wider
+ * @param col n | "n wide" | "n wider"
  * @param grid
  */
 function span(col: number | string, grid: Grid): number;
 function span(col?: number | string, grid?: null): string | 0;
 function span(col: number | string = 1, grid: Grid | null = null): number | string {
-	let count: number;
-	let spreadingInstruction: string | undefined;
-
-	if (typeof col === "string") {
-		const [n, s] = col.split(" ");
-		count = parseFloat(n);
-		spreadingInstruction = s;
-	} else {
-		count = col;
-	}
-
+	const { count, spreading } = parse(col);
 	if (count === 0) return 0;
 
 	// A fractional span fills part of the next column, so it crosses the gutter
 	// before it: 6.5 = 6 columns + 6 gutters + half a column.
-	const crossed = Math.sign(count) * (Math.ceil(Math.abs(count)) - 1);
-
-	const gutters = crossed + (spreadings[spreadingInstruction ?? ""] ?? 0) * Math.sign(count);
+	const gutters =
+		Math.sign(count) * (Math.ceil(Math.abs(count)) - 1 + (spreading ? spreadings[spreading] : 0));
 
 	if (grid) {
 		const { gutter, column } = metrics(grid);
@@ -62,37 +62,21 @@ function span(col: number | string = 1, grid: Grid | null = null): number | stri
 	return `calc(${count} * var(--column) ${sign} ${Math.abs(gutters)} * var(--gutter))`;
 }
 
-/**
- * Gutter
- * @return matching amount of gutters
- * @param count n
- * @param grid
- */
-function gutter(count: number, grid: Grid): number;
-function gutter(count?: number | string, grid?: null): string;
-function gutter(count: number | string = 1, grid: Grid | null = null): number | string {
-	return grid
-		? +count * metrics(grid).gutter
-		: +count === 1
-			? "var(--gutter)"
-			: `calc(${count} * var(--gutter))`;
-}
+/** A multiple of one grid variable: px with a grid, CSS without. */
+const multiple = (name: "gutter" | "margin", px: (grid: Grid) => number) => {
+	function fn(count: number | string, grid: Grid): number;
+	function fn(count?: number | string, grid?: null): string;
+	function fn(count: number | string = 1, grid: Grid | null = null): number | string {
+		const { count: n, spreading } = parse(count);
+		if (spreading) throw new Error(`A ${name} doesn't take "${spreading}"`);
+		if (grid) return n * px(grid);
+		return n === 1 ? `var(--${name})` : `calc(${n} * var(--${name}))`;
+	}
+	return fn;
+};
 
-/**
- * Margin
- * @return matching amount of margins
- * @param count n
- * @param grid
- */
-function margin(count: number, grid: Grid): number;
-function margin(count?: number | string, grid?: null): string;
-function margin(count: number | string = 1, grid: Grid | null = null): number | string {
-	return grid
-		? +count * (grid.margin ?? 0)
-		: +count === 1
-			? "var(--margin)"
-			: `calc(${count} * var(--margin))`;
-}
+const gutter = multiple("gutter", (grid) => metrics(grid).gutter);
+const margin = multiple("margin", (grid) => grid.margin ?? 0);
 
 export type PixelsToColumnsResult = {
 	className: string;
@@ -130,50 +114,37 @@ const pixelsToColumns = (
 		contentWidth: Math.round(contentWidth),
 	};
 
+	// First candidate closest to the target wins ties.
+	const closest = <T extends { width: number }>(candidates: T[]) =>
+		candidates.reduce((best, c) =>
+			Math.abs(c.width - pixels) < Math.abs(best.width - pixels) ? c : best,
+		);
+
 	// Sub-column values: match against gutter multiples.
 	if (pixels < columnWidth) {
-		const multiples = [0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6];
-		let best!: { mult: number; px: number };
-		let bestDiff = Infinity;
-		for (const mult of multiples) {
-			const px = gutterPx * mult;
-			const diff = Math.abs(px - pixels);
-			if (diff < bestDiff) {
-				bestDiff = diff;
-				best = { mult, px };
-			}
-		}
+		const best = closest(
+			[0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6].map((mult) => ({ mult, width: gutterPx * mult })),
+		);
 		return {
 			className: `gutter-gap-${best.mult}`,
 			columns: 0,
 			gutters: best.mult,
-			actualWidth: Math.round(best.px),
-			pixelDifference: Math.round(best.px - pixels),
+			actualWidth: Math.round(best.width),
+			pixelDifference: Math.round(best.width - pixels),
 			gridConfig,
 		};
 	}
 
-	// Whole-column spans, with optional wide/wider spreading.
-	const widthFor = (n: number, suffix: string) =>
-		suffix === "-wide"
-			? span(`${n} wide`, grid)
-			: suffix === "-wider"
-				? span(`${n} wider`, grid)
-				: span(n, grid);
-
-	let best!: { columns: number; suffix: string; width: number };
-	let bestDiff = Infinity;
-	for (let n = 1; n <= columns && bestDiff !== 0; n++) {
-		for (const suffix of ["", "-wide", "-wider"]) {
-			const width = widthFor(n, suffix);
-			const diff = Math.abs(width - pixels);
-			if (diff < bestDiff) {
-				bestDiff = diff;
-				best = { columns: n, suffix, width };
-			}
-			if (diff === 0) break;
-		}
-	}
+	// Whole-column spans, with optional spreading.
+	const best = closest(
+		Array.from({ length: columns }, (_, i) => i + 1).flatMap((n) =>
+			["", ...Object.keys(spreadings)].map((s) => ({
+				columns: n,
+				suffix: s && `-${s}`,
+				width: span(`${n} ${s}`.trim(), grid),
+			})),
+		),
+	);
 
 	return {
 		className: `span-w-${best.columns}${best.suffix}`,
@@ -184,4 +155,4 @@ const pixelsToColumns = (
 	};
 };
 
-export { metrics, span, gutter, margin, pixelsToColumns };
+export { metrics, spreadings, span, gutter, margin, pixelsToColumns };

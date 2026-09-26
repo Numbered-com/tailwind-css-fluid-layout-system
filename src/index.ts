@@ -1,9 +1,11 @@
 import plugin from "tailwindcss/plugin";
 import type { PluginAPI, PluginWithConfig } from "tailwindcss/plugin";
-import { metrics, span, gutter, margin, pixelsToColumns, type Grid } from "./grid-math.ts";
+import { metrics, spreadings, span, gutter, margin, pixelsToColumns, type Grid } from "./grid-math.ts";
 
-type Screen = string | { min?: string; max?: string };
-type GridFn = (count: number | string) => number | string;
+/** Tailwind's screen shapes: a min-width, a range, a raw query, or a list of them. */
+type ScreenRange = string | { min?: string; max?: string; raw?: string };
+type Screen = ScreenRange | ScreenRange[];
+type GridFn = (count: string) => number | string;
 type CssInJs = Parameters<PluginAPI["addBase"]>[0];
 type Options = {
 	fluidUnit?: (value: number) => string;
@@ -20,11 +22,7 @@ type FluidLayoutPlugin = {
 	__isOptionsFunction: true;
 };
 
-/**
- * Default fluid unit computation
- * @param {number} value - The fluid percentage value (e.g., 26.6667 for ~26.67vw)
- * @returns {string} - CSS value with unit
- */
+/** Fluid percentage (e.g. 26.6667) → CSS length. */
 const defaultFluidUnit = (value: number) => `${value.toPrecision(6)}vw`;
 
 const utilities: Record<string, string | string[]> = {
@@ -84,44 +82,29 @@ const utilities: Record<string, string | string[]> = {
 
 // -----------------------------------------------------o spans & gutters
 
-const gridContainer = () => {
-	return {
-		".grid-container": {
-			display: "block",
-			marginLeft: "auto",
-			marginRight: "auto",
-			width: "var(--grid-width)",
-		},
-		".grid-container-full": {
-			marginLeft: "calc(var(--margin) * -1)",
-			width: "calc(var(--grid-width) + 2 * var(--margin))",
-		},
-	};
+const gridContainer = {
+	".grid-container": {
+		display: "block",
+		marginLeft: "auto",
+		marginRight: "auto",
+		width: "var(--grid-width)",
+	},
+	".grid-container-full": {
+		marginLeft: "calc(var(--margin) * -1)",
+		width: "calc(var(--grid-width) + 2 * var(--margin))",
+	},
 };
 
-const guideline = (grid: Grid, color = "red") => {
-	let style = `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="${encodeURIComponent(color)}" width="100%">`;
+const guideline = (grid: Grid, color: string) => {
+	const { gutter, column } = metrics(grid);
+	const starts = Array.from({ length: grid.columns }, (_, i) => (grid.margin ?? 0) + i * (column + gutter));
+	// Each column's start and end; without gutters an end is the next start, so dedupe.
+	const xs = new Set(
+		starts.flatMap((x) => [x, x + column]).map((x) => ((x * 100) / grid.mockupWidth).toPrecision(6)),
+	);
+	const rects = [...xs].map((x) => `<rect x="${x}%" width="0.5px" height="100%"/>`).join("");
 
-	for (let i = 0; i < grid.columns; i++) {
-		const spanX = ((margin(1, grid) + span(i, grid)) * 100) / grid.mockupWidth;
-
-		style += `<rect x="${spanX}%" width="0.5px" height="100%"/>`;
-
-		if (i && grid.gutter) {
-			const gutterX =
-				((margin(1, grid) + span(`${i} wide`, grid)) * 100) / grid.mockupWidth;
-
-			style += `<rect x="${gutterX}%" width="0.5px" height="100%"/>`;
-		}
-	}
-
-	const last =
-		((margin(1, grid) + span(grid.columns, grid)) * 100) / grid.mockupWidth;
-
-	style += `<rect x="${last}%" width="0.5px" height="100%"/>`;
-	style += `</svg>') no-repeat scroll`;
-
-	return style;
+	return `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="${encodeURIComponent(color)}" width="100%">${rects}</svg>') no-repeat scroll`;
 };
 
 const guidelines = (
@@ -146,7 +129,7 @@ const guidelines = (
 
 	for (const grid of Object.values(grids)) {
 		if (grid.screen) {
-			after[parseScreen(screens[grid.screen])!] = {
+			after[parseScreen(screens[grid.screen])] = {
 				background: guideline(grid, color),
 			};
 		}
@@ -157,30 +140,32 @@ const guidelines = (
 
 // -----------------------------------------------------o Plugin
 
-const parseScreen = (screen: Screen) => {
-	if (typeof screen === "string") {
-		return `@media (min-width: ${screen})`;
-	} else if (typeof screen === "object") {
-		return `@media (${screen.min !== undefined ? `min-width: ${screen.min}` : ""}${screen.min !== undefined && screen.max !== undefined ? ") and (" : ""}${
-			screen.max !== undefined ? `max-width: ${screen.max}` : ""
-		})`;
-	}
-};
+const parseScreen = (screen: Screen) =>
+	`@media ${[screen]
+		.flat()
+		.map((s) =>
+			typeof s === "string"
+				? `(min-width: ${s})`
+				: (s.raw ??
+					[s.min && `(min-width: ${s.min})`, s.max && `(max-width: ${s.max})`]
+						.filter(Boolean)
+						.join(" and ")),
+		)
+		.join(", ")}`;
 
 // Tailwind negates a utility by wrapping the resolved value: `calc(<value> * -1)`.
 // Our values are grid instructions (`3`, `3 wide`), not CSS, so unwrap the
-// negation and fold the sign into the count before the math fns parse it.
+// negation and fold the sign into the instruction for the math fns to parse.
 const negated = /^calc\((.+) \* -1\)$/;
-const instruction = /^(\d*\.?\d+)(?: (wide|wider))?$/;
 
-// Anything that isn't a count (plus `wide`/`wider` on spans) yields no utility.
-const resolveValue = (fn: GridFn, value: string, spreads: boolean) => {
+// The math fns reject anything that isn't a valid instruction; that yields no utility.
+const resolveValue = (fn: GridFn, value: string) => {
 	const negation = value.match(negated);
-	const match = (negation?.[1] ?? value).match(instruction);
-	if (!match || (match[2] && !spreads)) return null;
-
-	const count = negation ? -match[1] : +match[1];
-	return fn(match[2] ? `${count} ${match[2]}` : count);
+	try {
+		return `${fn(negation ? `-${negation[1]}` : value)}`;
+	} catch {
+		return null;
+	}
 };
 
 const matchUtilitiesFor = (
@@ -188,26 +173,19 @@ const matchUtilitiesFor = (
 	fn: GridFn,
 	matchUtilities: PluginAPI["matchUtilities"],
 	values: Record<string, string>,
-) => {
-	for (const utility in utilities) {
-		const element = utilities[utility];
-
-		matchUtilities(
-			{
-				[`${key}-${utility}`]: (value) => {
-					const resolved = resolveValue(fn, value, key === "span");
-					if (resolved === null) return [];
-					const css = `${resolved}`;
-
-					return Array.isArray(element)
-						? Object.fromEntries(element.map((property) => [property, css]))
-						: { [element]: css };
+) =>
+	matchUtilities(
+		Object.fromEntries(
+			Object.entries(utilities).map(([utility, properties]) => [
+				`${key}-${utility}`,
+				(value: string) => {
+					const css = resolveValue(fn, value);
+					return css === null ? [] : Object.fromEntries([properties].flat().map((p) => [p, css]));
 				},
-			},
-			{ values, supportsNegativeValues: true },
-		);
-	}
-};
+			]),
+		),
+		{ values, supportsNegativeValues: true },
+	);
 
 const grid: FluidLayoutPlugin = plugin.withOptions<Options>(
 	(options) => {
@@ -220,15 +198,6 @@ const grid: FluidLayoutPlugin = plugin.withOptions<Options>(
 				throw new Error(`grid.mobile is the default and cannot be undefined`);
 
 			const fluidUnit = options?.fluidUnit || defaultFluidUnit;
-
-			/**
-			 * Compute a fluid CSS value with scrollbar width compensation
-			 * @param {number} fluidValue - The fluid percentage value
-			 * @returns {string} - CSS calc expression
-			 */
-			const computeFluidValue = (fluidValue: number) => {
-				return `calc(${fluidUnit(fluidValue)} - var(--sbw) * ${(fluidValue / 100).toPrecision(6)})`;
-			};
 
 			addBase({
 				html: {
@@ -251,11 +220,11 @@ const grid: FluidLayoutPlugin = plugin.withOptions<Options>(
 				const vw = 100 / grid.mockupWidth;
 				const { gridWidth, gutter, column } = metrics(grid);
 
-				// Past maxWidth the grid stops scaling. Capping with min() rather than
-				// a media query keeps it continuous, as the fluid side already
-				// subtracts the scrollbar.
+				// Fluid value minus its share of the scrollbar. Past maxWidth the grid
+				// stops scaling: capping with min() rather than a media query keeps it
+				// continuous, as the fluid side already subtracts the scrollbar.
 				const fluid = (px: number, maxWidth = grid.maxWidth) => {
-					const value = computeFluidValue(px * vw);
+					const value = `calc(${fluidUnit(px * vw)} - var(--sbw) * ${((px * vw) / 100).toPrecision(6)})`;
 					return maxWidth
 						? `min(${value}, ${+((px * maxWidth) / grid.mockupWidth).toFixed(5)}px)`
 						: value;
@@ -274,7 +243,7 @@ const grid: FluidLayoutPlugin = plugin.withOptions<Options>(
 
 			// grid container
 
-			addComponents(gridContainer());
+			addComponents(gridContainer);
 
 			// utilities
 
@@ -283,24 +252,18 @@ const grid: FluidLayoutPlugin = plugin.withOptions<Options>(
 			// Values stay grid instructions, not CSS: the utility callback runs them
 			// through the math fns, so arbitrary values (`span-w-[0.665]`) take the
 			// exact same path as named ones.
-			const getValues = (withExpansion = false) => {
-				const values: Record<string, string> = {};
-				Array.from({ length: maxColumns }, (_, i) => {
-					const j = i + 1;
-
-					values[j] = `${j}`;
-
-					if (withExpansion) {
-						values[`${j}-wide`] = `${j} wide`;
-						values[`${j}-wider`] = `${j} wider`;
-					}
-				});
-				return values;
+			const counts = Array.from({ length: maxColumns }, (_, i) => `${i + 1}`);
+			const values = Object.fromEntries(counts.map((n) => [n, n]));
+			const spanValues = {
+				...values,
+				...Object.fromEntries(
+					counts.flatMap((n) => Object.keys(spreadings).map((s) => [`${n}-${s}`, `${n} ${s}`])),
+				),
 			};
 
-			matchUtilitiesFor("span", span, matchUtilities, getValues(true));
-			matchUtilitiesFor("gutter", gutter, matchUtilities, getValues());
-			matchUtilitiesFor("margin", margin, matchUtilities, getValues());
+			matchUtilitiesFor("span", span, matchUtilities, spanValues);
+			matchUtilitiesFor("gutter", gutter, matchUtilities, values);
+			matchUtilitiesFor("margin", margin, matchUtilities, values);
 
 			// guidelines
 
@@ -313,14 +276,14 @@ const grid: FluidLayoutPlugin = plugin.withOptions<Options>(
 					guidelines(
 						grids,
 						screens,
-						options?.color || "red",
-						options?.guidelinesSelector || "body",
+						options?.color,
+						options?.guidelinesSelector,
 					),
 				);
 			}
 		};
 	},
-	(options) => {
+	() => {
 		return {
 			theme: {
 				grid: {

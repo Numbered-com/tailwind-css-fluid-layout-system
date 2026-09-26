@@ -10,12 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `scrollbarWidth` option to set `--sbw` on fine pointers (defaults to `17px`; use `0px` for overlay scrollbars).
-- `metrics(grid)` export from `grid-math`: pixel grid width, gutter and column.
+- `metrics(grid)` and `spreadings` exports from `grid-math`: pixel grid width, gutter and column; the gutters each `wide`/`wider` adds.
 
 ### Changed
 
 - Fractional spans now include the gutter before their partial column: `span-w-[6.5]` is `6.5 * var(--column) + 6 * var(--gutter)` and ends mid-column 7 (previously `+ 5.5`, half a gutter short). Whole spans are unchanged.
 - Source migrated to TypeScript; the package now ships compiled `dist/` JS with `.d.ts` typings (built by `tsc` on `prepublishOnly`). Exported types: `Grid`, `PixelsToColumnsResult`.
+- `span()`, `gutter()` and `margin()` throw on invalid instructions (`span("foo")`, `gutter("2 wide")`) instead of returning `calc(NaN …)`.
+- Guideline overlay SVG positions are rounded to 6 significant digits, shrinking the generated CSS.
 
 ### Fixed
 
@@ -28,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A custom `fluidUnit` now also applies to the fluid font size.
 - `--sbw` is declared once instead of once per grid.
 - `px-to-cols --batch` rejects items without a positive `pixels` value.
+- Grids on `{ raw }` or array screens get their real media query instead of `@media ()`.
 
 ### Removed
 

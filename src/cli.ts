@@ -5,16 +5,18 @@ import { pixelsToColumns } from "./grid-math.ts";
 
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 
+const DEFAULTS = { columns: 24, mockupWidth: 1440, gutter: 24, margin: 24 };
+
 const HELP = `px-to-cols — convert a pixel value to a fluid grid span class
 
 Usage:
   px-to-cols <pixels> [--columns N] [--mockup N] [--gutter N] [--margin N] [--json]
 
 Options (all sizes in px):
-  --columns N   Number of grid columns   (default: 24)
-  --mockup  N   Mockup width in px       (default: 1440)
-  --gutter  N   Gutter size in px        (default: 24)
-  --margin  N   Outer margin in px       (default: 24)
+  --columns N   Number of grid columns   (default: ${DEFAULTS.columns})
+  --mockup  N   Mockup width in px       (default: ${DEFAULTS.mockupWidth})
+  --gutter  N   Gutter size in px        (default: ${DEFAULTS.gutter})
+  --margin  N   Outer margin in px       (default: ${DEFAULTS.margin})
   --json        Output the full JSON result
   --batch       Read a JSON array of {pixels,columns,mockupWidth,gutter,margin}
                 from stdin; write a JSON array of results (one bunx call, many values)
@@ -26,14 +28,14 @@ Examples:
   echo '[{"pixels":330,"columns":24,"mockupWidth":1440,"gutter":24,"margin":24}]' | px-to-cols --batch`;
 
 function parseArgs(argv: string[]) {
-	const opts = { columns: 24, mockup: 1440, gutter: 24, margin: 24, json: false, help: false };
+	const opts = { ...DEFAULTS, json: false, help: false };
 	let pixels: number | undefined;
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
 		if (a === "--json") opts.json = true;
 		else if (a === "-h" || a === "--help") opts.help = true;
 		else if (a === "--columns") opts.columns = Number(argv[++i]);
-		else if (a === "--mockup") opts.mockup = Number(argv[++i]);
+		else if (a === "--mockup") opts.mockupWidth = Number(argv[++i]);
 		else if (a === "--gutter") opts.gutter = Number(argv[++i]);
 		else if (a === "--margin") opts.margin = Number(argv[++i]);
 		else if (pixels === undefined) pixels = Number(a);
@@ -72,10 +74,10 @@ async function runBatch() {
 	}
 	const results = items.map((it: Record<string, unknown>) =>
 		pixelsToColumns(Number(it.pixels), {
-			columns: Number(it.columns ?? 24),
-			mockupWidth: Number(it.mockupWidth ?? 1440),
-			gutter: Number(it.gutter ?? 24),
-			margin: Number(it.margin ?? 24),
+			columns: Number(it.columns ?? DEFAULTS.columns),
+			mockupWidth: Number(it.mockupWidth ?? DEFAULTS.mockupWidth),
+			gutter: Number(it.gutter ?? DEFAULTS.gutter),
+			margin: Number(it.margin ?? DEFAULTS.margin),
 		}),
 	);
 	console.log(JSON.stringify(results));
@@ -110,12 +112,7 @@ function main() {
 		process.exit(1);
 	}
 
-	const result = pixelsToColumns(pixels, {
-		columns: opts.columns,
-		mockupWidth: opts.mockup,
-		gutter: opts.gutter,
-		margin: opts.margin,
-	});
+	const result = pixelsToColumns(pixels, opts);
 
 	if (opts.json) {
 		console.log(JSON.stringify(result, null, 2));
