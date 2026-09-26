@@ -3,15 +3,16 @@ import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { compile } from "tailwindcss";
+import { gutter } from "../src/grid-math.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 // Compile classes through Tailwind itself, so the utilities are exercised the
 // same way an app does: named values, arbitrary values and negation all go
 // through Tailwind's candidate parsing before reaching the plugin.
-const css = async (classes) => {
+const css = async (classes, pluginOptions = "") => {
 	const compiler = await compile(
-		`@import "tailwindcss";\n@plugin "${root}/src/index.ts";`,
+		`@import "tailwindcss";\n@plugin "${root}/src/index.ts" ${pluginOptions};`,
 		{
 			base: root,
 			async loadStylesheet(id, base) {
@@ -250,6 +251,38 @@ describe("unsupported values produce no CSS", () => {
 	test("an unknown spreading instruction is rejected", async () => {
 		expect(await declarations("span-w-3-widest")).toBeUndefined();
 	});
+
+	test("an arbitrary value that isn't a count is rejected", async () => {
+		for (const className of ["span-w-[foo]", "gutter-w-[abc]", "margin-w-[1px]"])
+			expect(await declarations(className)).toBeUndefined();
+	});
+
+	test("an unknown or misplaced spreading instruction is rejected", async () => {
+		expect(await declarations("span-w-[3_widest]")).toBeUndefined();
+		expect(await declarations("gutter-w-[2_wide]")).toBeUndefined();
+	});
+});
+
+describe("base variables", () => {
+	test("the maxWidth cap meets the fluid value, so the grid doesn't jump", async () => {
+		// Default desktop grid: 1440px mockup, 60px margins, capped at 1920px.
+		const out = await css([]);
+		const [, coefficient, cap] = out.match(
+			/--grid-width: min\(calc\(([\d.]+)vw - var\(--sbw\) \* [\d.]+\), ([\d.]+)px\)/,
+		);
+
+		expect(Math.abs((coefficient / 100) * 1920 - cap)).toBeLessThan(0.01);
+	});
+
+	test("the scrollbar width is declared once", async () => {
+		expect((await css([])).split("--sbw: 0px").length - 1).toBe(1);
+	});
+
+	test("a hex guideline colour is encoded into the data URL", async () => {
+		const out = await css([], '{ guidelines: true; color: "#ff0000"; }');
+
+		expect(out).toContain('fill="%23ff0000"');
+	});
 });
 
 describe("variants", () => {
@@ -260,5 +293,12 @@ describe("variants", () => {
 			"calc(0.665 * var(--column) + 0 * var(--gutter))",
 		);
 		expect(out).not.toContain("width: 0.665;");
+	});
+});
+
+describe("grid math", () => {
+	test("gutter() resolves a ratio gutter to px", () => {
+		// 1000px grid, 10 columns, gutter ratio 0.1 → 10px per gutter.
+		expect(gutter(2, { columns: 10, mockupWidth: 1000, gutter: 0.1 })).toBe(20);
 	});
 });

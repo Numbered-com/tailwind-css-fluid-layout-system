@@ -1,6 +1,6 @@
 import plugin from "tailwindcss/plugin";
 import type { PluginAPI, PluginWithConfig } from "tailwindcss/plugin";
-import { span, gutter, margin, pixelsToColumns, type Grid } from "./grid-math.ts";
+import { metrics, span, gutter, margin, pixelsToColumns, type Grid } from "./grid-math.ts";
 
 type Screen = string | { min?: string; max?: string };
 type GridFn = (count: number | string) => number | string;
@@ -10,6 +10,8 @@ type Options = {
 	guidelines?: boolean;
 	color?: string;
 	guidelinesSelector?: string;
+	/** `--sbw` on fine pointers; set `0px` where scrollbars overlay (macOS). */
+	scrollbarWidth?: string;
 };
 
 /** Mirrors Tailwind's `PluginWithOptions<Options>`, which it doesn't export. */
@@ -98,7 +100,7 @@ const gridContainer = () => {
 };
 
 const guideline = (grid: Grid, color = "red") => {
-	let style = `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="${color}" width="100%">`;
+	let style = `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="${encodeURIComponent(color)}" width="100%">`;
 
 	for (let i = 0; i < grid.columns; i++) {
 		const spanX = ((margin(1, grid) + span(i, grid)) * 100) / grid.mockupWidth;
@@ -139,7 +141,7 @@ const guidelines = (
 		transform: "translateX(-50%)",
 		"pointer-events": "none",
 		background: guideline(grids.mobile, color),
-		visibility: 'var(--guidelines-visibility, "inherit")',
+		visibility: "var(--guidelines-visibility, inherit)",
 	};
 
 	for (const grid of Object.values(grids)) {
@@ -169,13 +171,16 @@ const parseScreen = (screen: Screen) => {
 // Our values are grid instructions (`3`, `3 wide`), not CSS, so unwrap the
 // negation and fold the sign into the count before the math fns parse it.
 const negated = /^calc\((.+) \* -1\)$/;
+const instruction = /^(\d*\.?\d+)(?: (wide|wider))?$/;
 
-const resolveValue = (fn: GridFn, value: unknown) => {
-	const match = `${value}`.match(negated);
-	if (!match) return fn(value as number | string);
+// Anything that isn't a count (plus `wide`/`wider` on spans) yields no utility.
+const resolveValue = (fn: GridFn, value: string, spreads: boolean) => {
+	const negation = value.match(negated);
+	const match = (negation?.[1] ?? value).match(instruction);
+	if (!match || (match[2] && !spreads)) return null;
 
-	const [count, spreading] = match[1].split(" ");
-	return fn(spreading ? `-${count} ${spreading}` : -parseFloat(count));
+	const count = negation ? -match[1] : +match[1];
+	return fn(match[2] ? `${count} ${match[2]}` : count);
 };
 
 const matchUtilitiesFor = (
@@ -190,11 +195,13 @@ const matchUtilitiesFor = (
 		matchUtilities(
 			{
 				[`${key}-${utility}`]: (value) => {
-					const resolved = `${resolveValue(fn, value)}`;
+					const resolved = resolveValue(fn, value, key === "span");
+					if (resolved === null) return [];
+					const css = `${resolved}`;
 
 					return Array.isArray(element)
-						? Object.fromEntries(element.map((property) => [property, resolved]))
-						: { [element]: resolved };
+						? Object.fromEntries(element.map((property) => [property, css]))
+						: { [element]: css };
 				},
 			},
 			{ values, supportsNegativeValues: true },
@@ -223,97 +230,46 @@ const grid: FluidLayoutPlugin = plugin.withOptions<Options>(
 				return `calc(${fluidUnit(fluidValue)} - var(--sbw) * ${(fluidValue / 100).toPrecision(6)})`;
 			};
 
+			addBase({
+				html: {
+					"--sbw": "0px",
+					"@media (pointer: fine)": { "--sbw": options?.scrollbarWidth ?? "17px" },
+				},
+			});
+
 			for (const key in grids) {
 				const grid = grids[key];
 
-				grid.gutter = grid.gutter || 0;
-				grid.margin = grid.margin || 0;
-
+				if (grid.screen && screens[grid.screen] === undefined)
+					throw new Error(`Unknown screen "${grid.screen}" for ${key}`);
 				if (grid.columns === undefined)
 					throw new Error(`columns is required for ${key}`);
 				if (grid.mockupWidth === undefined)
 					throw new Error(`mockupWidth is required for ${key}`);
 				const mediaQuery = grid.screen ? parseScreen(screens[grid.screen]) : null;
 
-				// base
-
 				const vw = 100 / grid.mockupWidth;
+				const { gridWidth, gutter, column } = metrics(grid);
 
-				const margin = grid.margin;
-				const fluidMargin = margin * vw;
-
-				const gridWidth = grid.mockupWidth - 2 * margin;
-				const fluidGridWidth = gridWidth * vw;
-
-				const gutter =
-					grid.gutter < 1
-						? (gridWidth * grid.gutter) / grid.columns
-						: grid.gutter;
-
-				if (grid.gutter >= 1) grid.gutter = (grid.columns * gutter) / gridWidth;
-				const fluidGutter = gutter * vw;
-
-				const column = (gridWidth - (grid.columns - 1) * gutter) / grid.columns;
-				const fluidColumn = column * vw;
-
-				const fontSize = `calc(${(vw * 16).toPrecision(5)}vw - var(--sbw) * ${(16 / grid.mockupWidth).toPrecision(5)})`;
-				const fontMaxWidth = grid.fontScalingMaxWidth || grid.maxWidth;
-				const maxFontSize = fontMaxWidth
-					? `min(${fontSize}, ${((16 * fontMaxWidth) / grid.mockupWidth).toPrecision(3)}px)`
-					: null;
-
-				const vars = {
-					"--grid-width": computeFluidValue(fluidGridWidth),
-					"--margin": computeFluidValue(fluidMargin),
-					"--gutter": computeFluidValue(fluidGutter),
-					"--column": computeFluidValue(fluidColumn),
-					fontSize: maxFontSize || fontSize,
+				// Past maxWidth the grid stops scaling. Capping with min() rather than
+				// a media query keeps it continuous, as the fluid side already
+				// subtracts the scrollbar.
+				const fluid = (px: number, maxWidth = grid.maxWidth) => {
+					const value = computeFluidValue(px * vw);
+					return maxWidth
+						? `min(${value}, ${+((px * maxWidth) / grid.mockupWidth).toFixed(5)}px)`
+						: value;
 				};
 
-				addBase({
-					html: {
-						"--sbw": "0px",
-						// container-type: inline-size breaks sticky on chrome and old safari...
-						// '@supports (container-type: inline-size)': { 'container-type': 'inline-size', '--sbw': 'calc(100vw - 100cqw)' },
-						// force sbw to 15px for safari < 18
-						// '@supports (hanging-punctuation: first) and (font: -apple-system-body) and (-webkit-appearance: none) and (not (view-transition-name: none))': {
-						//   '--sbw': '15px'
-						// },
-						// mobile reset
-						// '@media (pointer: coarse)': { 'container-type': 'revert', '--sbw': '0px' }
-						"@media (pointer: fine)": { "--sbw": "17px" },
-						// debug
-						// '&::before': { content: 'counter(val) "px"', counterReset: 'val tan(atan2(var(--sbw), 1px))', position: 'fixed', color: 'red', 'z-index': 10000 }
-					},
-					// body: {
-					//   overflow: 'overlay'
-					// }
-				});
+				const vars = {
+					"--grid-width": fluid(gridWidth),
+					"--margin": fluid(grid.margin ?? 0),
+					"--gutter": fluid(gutter),
+					"--column": fluid(column),
+					fontSize: fluid(16, grid.fontScalingMaxWidth || grid.maxWidth),
+				};
 
-				if (mediaQuery) {
-					addBase({ html: { [mediaQuery]: vars } });
-				} else {
-					addBase({ html: vars });
-				}
-
-				if (grid.maxWidth) {
-					const maxMargin = (margin * grid.maxWidth) / grid.mockupWidth;
-					const maxGridWidth = grid.maxWidth - 2 * maxMargin;
-					const maxGutter = (maxGridWidth * grid.gutter) / grid.columns;
-					const maxColumn =
-						(maxGridWidth - (grid.columns - 1) * maxGutter) / grid.columns;
-
-					addBase({
-						html: {
-							[`@media (min-width: ${grid.maxWidth}px)`]: {
-								"--grid-width": `${maxGridWidth.toFixed(5)}px`,
-								"--margin": `${maxMargin.toFixed(5)}px`,
-								"--gutter": `${maxGutter.toFixed(5)}px`,
-								"--column": `${maxColumn.toFixed(5)}px`,
-							},
-						},
-					});
-				}
+				addBase({ html: mediaQuery ? { [mediaQuery]: vars } : vars });
 			}
 
 			// grid container

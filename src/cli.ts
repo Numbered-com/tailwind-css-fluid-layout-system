@@ -65,7 +65,12 @@ async function runBatch() {
 		console.error("Error: --batch expects a JSON array on stdin");
 		process.exit(1);
 	}
-	const results = items.map((it) =>
+	const invalid = items.findIndex((it) => !(Number(it?.pixels) > 0));
+	if (invalid !== -1) {
+		console.error(`Error: item ${invalid} needs a positive "pixels" value`);
+		process.exit(1);
+	}
+	const results = items.map((it: Record<string, unknown>) =>
 		pixelsToColumns(Number(it.pixels), {
 			columns: Number(it.columns ?? 24),
 			mockupWidth: Number(it.mockupWidth ?? 1440),

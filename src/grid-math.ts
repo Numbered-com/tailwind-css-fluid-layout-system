@@ -5,13 +5,25 @@ export type Grid = {
 	columns: number;
 	mockupWidth: number;
 	/** px (>= 1) or a ratio of the grid width per column (< 1) */
-	gutter: number;
-	margin: number;
+	gutter?: number;
+	margin?: number;
 	/** theme `screens` key the grid applies from */
 	screen?: string;
 	maxWidth?: number;
 	fontScalingMaxWidth?: number;
 };
+
+/** Pixel metrics of a grid at its mockup width. */
+export type GridMetrics = { gridWidth: number; gutter: number; column: number };
+
+const metrics = ({ columns, mockupWidth, gutter = 0, margin = 0 }: Grid): GridMetrics => {
+	const gridWidth = mockupWidth - 2 * margin;
+	// gutter may be given as a px value (>= 1) or a ratio (< 1); resolve to px.
+	const gutterPx = gutter < 1 ? (gridWidth * gutter) / columns : gutter;
+	return { gridWidth, gutter: gutterPx, column: (gridWidth - (columns - 1) * gutterPx) / columns };
+};
+
+const spreadings: Record<string, number> = { wide: 1, wider: 2 };
 
 /**
  * Span
@@ -39,31 +51,15 @@ function span(col: number | string = 1, grid: Grid | null = null): number | stri
 	// before it: 6.5 = 6 columns + 6 gutters + half a column.
 	const crossed = Math.sign(count) * (Math.ceil(Math.abs(count)) - 1);
 
-	if (grid) {
-		const gridWidth = grid.mockupWidth - 2 * grid.margin;
-		// gutter may be given as a px value (>= 1) or a ratio (< 1); resolve to px.
-		const gutter =
-			grid.gutter < 1 ? (gridWidth * grid.gutter) / grid.columns : grid.gutter;
-		const column = (gridWidth - (grid.columns - 1) * gutter) / grid.columns;
-		const spreading =
-			spreadingInstruction === "wide"
-				? gutter
-				: spreadingInstruction === "wider"
-					? gutter * 2
-					: 0;
-		return count * column + crossed * gutter + spreading;
-	} else {
-		const spreading =
-			spreadingInstruction === "wide"
-				? 1
-				: spreadingInstruction === "wider"
-					? 2
-					: 0;
-		const gutters = crossed + spreading * Math.sign(count);
-		const sign = gutters < 0 ? "-" : "+";
+	const gutters = crossed + (spreadings[spreadingInstruction ?? ""] ?? 0) * Math.sign(count);
 
-		return `calc(${count} * var(--column) ${sign} ${Math.abs(gutters)} * var(--gutter))`;
+	if (grid) {
+		const { gutter, column } = metrics(grid);
+		return count * column + gutters * gutter;
 	}
+
+	const sign = gutters < 0 ? "-" : "+";
+	return `calc(${count} * var(--column) ${sign} ${Math.abs(gutters)} * var(--gutter))`;
 }
 
 /**
@@ -76,7 +72,7 @@ function gutter(count: number, grid: Grid): number;
 function gutter(count?: number | string, grid?: null): string;
 function gutter(count: number | string = 1, grid: Grid | null = null): number | string {
 	return grid
-		? +count * grid.gutter
+		? +count * metrics(grid).gutter
 		: +count === 1
 			? "var(--gutter)"
 			: `calc(${count} * var(--gutter))`;
@@ -92,7 +88,7 @@ function margin(count: number, grid: Grid): number;
 function margin(count?: number | string, grid?: null): string;
 function margin(count: number | string = 1, grid: Grid | null = null): number | string {
 	return grid
-		? +count * grid.margin
+		? +count * (grid.margin ?? 0)
 		: +count === 1
 			? "var(--margin)"
 			: `calc(${count} * var(--margin))`;
@@ -120,12 +116,10 @@ export type PixelsToColumnsResult = {
  */
 const pixelsToColumns = (
 	pixels: number,
-	grid: Pick<Grid, "columns" | "mockupWidth" | "gutter" | "margin">,
+	grid: Grid,
 ): PixelsToColumnsResult => {
-	const { columns, mockupWidth, margin: marginPx } = grid;
-	const contentWidth = mockupWidth - 2 * marginPx;
-	const columnWidth = span(1, grid);
-	const gutterPx = span("1 wide", grid) - columnWidth;
+	const { columns, mockupWidth, margin: marginPx = 0 } = grid;
+	const { gridWidth: contentWidth, gutter: gutterPx, column: columnWidth } = metrics(grid);
 
 	const gridConfig = {
 		columns,
@@ -190,4 +184,4 @@ const pixelsToColumns = (
 	};
 };
 
-export { span, gutter, margin, pixelsToColumns };
+export { metrics, span, gutter, margin, pixelsToColumns };

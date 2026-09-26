@@ -7,10 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `scrollbarWidth` option to set `--sbw` on fine pointers (defaults to `17px`; use `0px` for overlay scrollbars).
+- `metrics(grid)` export from `grid-math`: pixel grid width, gutter and column.
+
 ### Changed
 
 - Fractional spans now include the gutter before their partial column: `span-w-[6.5]` is `6.5 * var(--column) + 6 * var(--gutter)` and ends mid-column 7 (previously `+ 5.5`, half a gutter short). Whole spans are unchanged.
 - Source migrated to TypeScript; the package now ships compiled `dist/` JS with `.d.ts` typings (built by `tsc` on `prepublishOnly`). Exported types: `Grid`, `PixelsToColumnsResult`.
+
+### Fixed
+
+- Invalid arbitrary values (`span-w-[foo]`, `margin-w-[1px]`, `span-w-[3_widest]`, `gutter-w-[2_wide]`) no longer emit broken `calc()` CSS; they produce no utility.
+- Grids with `maxWidth` no longer jump by the scrollbar compensation at the breakpoint: variables are capped with `min()` instead of a separate media query.
+- Hex guideline colours (`#ff0000`) are URL-encoded, so the overlay's data URL no longer truncates.
+- The guidelines' `visibility` fallback is a valid `inherit` instead of the string `"inherit"`.
+- The plugin no longer mutates the theme's grid config; `gutter(n, grid)` returns px for ratio gutters too.
+- An unknown `screen` key throws instead of emitting `@media undefined`.
+- A custom `fluidUnit` now also applies to the fluid font size.
+- `--sbw` is declared once instead of once per grid.
+- `px-to-cols --batch` rejects items without a positive `pixels` value.
+
+### Removed
+
+- Commented-out experiments in the base styles.
 
 ## [1.0.0] - 2026-06-28
 
