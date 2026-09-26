@@ -26,9 +26,11 @@
 	"scripts": {
 		"test": "bun test",
 		"prepublishOnly": "tsc",
-		"patch": "npm version patch --force && npm publish",
-		"minor": "npm version minor --force && npm publish",
-		"major": "npm version major --force && npm publish"
+		"version": "perl -pi -e \"s/^## \\[Unreleased\\]/## [$npm_package_version] - $(date +%F)/\" CHANGELOG.md && git add CHANGELOG.md",
+		"postversion": "git push --follow-tags",
+		"patch": "npm version patch",
+		"minor": "npm version minor",
+		"major": "npm version major"
 	},
 	"peerDependencies": {
 		"tailwindcss": ">=4.0.0"
