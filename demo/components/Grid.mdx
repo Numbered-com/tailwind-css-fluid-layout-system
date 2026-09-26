@@ -1,5 +1,3 @@
-<div className='sticky z-1 top-0 span-w-1 bg-red-500 ml-auto text-sm px-2'>Sticky</div>
-
 <span className="lead">
   This plugin attempts to simplify fluid grid system implementation with deeply nested elements.
 </span>
@@ -8,10 +6,10 @@
 
 Use the <code>span</code> utility to set the column count with a sizing prop.
 
-<div className="flex flex-col text-black text-sm text-center">
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-1">span-w-1</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2">span-w-2</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-3">span-w-3</div>
+<div className="flex flex-col">
+	<div className="tile gutter-mb-1 span-w-1">span-w-1</div>
+	<div className="tile gutter-mb-1 span-w-2">span-w-2</div>
+	<div className="tile gutter-mb-1 span-w-3">span-w-3</div>
 </div>
 
 ## Gutters
@@ -19,61 +17,61 @@ Use the <code>span</code> utility to set the column count with a sizing prop.
 
 Use the <code>gutter</code> utility to set the gutter count with a sizing prop.
 
-<div className="flex text-black text-sm text-center">
-	<div className="bg-red-300 flex justify-center items-center h-20 span-ml-1 gutter-w-1"></div>
+<div className="flex">
+	<div className="tile span-ml-1 gutter-w-1"></div>
 </div>
 
 ### With span
 
 You can use <code>wide</code> suffix to add one gutter to span, and <code>wider</code> to add two gutters.
 
-<div className="flex flex-col text-black text-sm text-center">
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2">span-w-2</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2-wide">span-w-2-wide</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2-wider">span-w-2-wider</div>
+<div className="flex flex-col">
+	<div className="tile gutter-mb-1 span-w-2">span-w-2</div>
+	<div className="tile gutter-mb-1 span-w-2-wide">span-w-2-wide</div>
+	<div className="tile gutter-mb-1 span-w-2-wider">span-w-2-wider</div>
 </div>
 
 ### Spans & gutters
 
 Container with <code>gutter-gap-1</code> class.
 
-<div className="flex text-black text-sm text-center gutter-gap-1">
-	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2">span-w-2</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2">span-w-2</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 span-w-3">span-w-3</div>
+<div className="flex gutter-gap-1">
+	<div className="tile span-w-2">span-w-2</div>
+	<div className="tile span-w-2">span-w-2</div>
+	<div className="tile span-w-3">span-w-3</div>
 </div>
 
 Manual spacing.
 
-<div className="flex text-black text-sm text-center">
-	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2">span-w-2</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2 gutter-ml-1">span-w-2<br/>gutter-ml-1</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2 span-ml-1-wider">span-w-2<br/>span-ml-1-wider</div>
+<div className="flex">
+	<div className="tile span-w-2">span-w-2</div>
+	<div className="tile span-w-2 gutter-ml-1">span-w-2<br/>gutter-ml-1</div>
+	<div className="tile span-w-2 span-ml-1-wider">span-w-2<br/>span-ml-1-wider</div>
 </div>
 
 
 ### Margin
 
-Use the <code>margin</code> utility to get outter margins if needed.
+Use the <code>margin</code> utility to get outer margins if needed.
 
-<div className="flex text-black text-sm text-center h-20 relative">
-	<div className="bg-red-300 flex justify-center items-center h-20 span-mr-2-wide margin-w-1 absolute right-full">margin-w-1</div>
+<div className="flex h-20 relative">
+	<div className="tile span-mr-2-wide margin-w-1 absolute right-full">margin-w-1</div>
 </div>
 
 ## Arbitrary values
 
 Every utility takes an arbitrary value, so a count doesn't have to be a whole number. It stays a multiplier of the grid: <code>span-w-[0.5]</code> resolves to <code>calc(0.5 \* var(--column) - 0.5 \* var(--gutter))</code>, never to <code>0.5px</code>.
 
-<div className="flex flex-col text-black text-sm text-center">
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-[0.5]">span-w-[0.5]</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-1">span-w-1</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-[1.5]">span-w-[1.5]</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2">span-w-2</div>
+<div className="flex flex-col">
+	<div className="tile gutter-mb-1 span-w-[0.5]">span-w-[0.5]</div>
+	<div className="tile gutter-mb-1 span-w-1">span-w-1</div>
+	<div className="tile gutter-mb-1 span-w-[1.5]">span-w-[1.5]</div>
+	<div className="tile gutter-mb-1 span-w-2">span-w-2</div>
 </div>
 
 Spreading instructions work too, with an underscore standing in for the space.
 
-<div className="flex flex-col text-black text-sm text-center">
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-[1.5]">span-w-[1.5]</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-[1.5_wide]">span-w-[1.5_wide]</div>
+<div className="flex flex-col">
+	<div className="tile gutter-mb-1 span-w-[1.5]">span-w-[1.5]</div>
+	<div className="tile gutter-mb-1 span-w-[1.5_wide]">span-w-[1.5_wide]</div>
 </div>

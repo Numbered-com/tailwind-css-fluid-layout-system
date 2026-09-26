@@ -7,3 +7,39 @@
 @source "../pages";
 @source "../components";
 @source "../hooks";
+
+@theme {
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-display), ui-serif, Georgia, serif;
+  --font-mono: var(--font-code), ui-monospace, monospace;
+  --color-ink: #12110f;
+  --color-ink-2: #1c1a17;
+  --color-paper: #ede6da;
+  --color-muted: #9a9185;
+  --color-accent: #ff6b3d;
+}
+
+/* Bar is the measured element; label sits below it so it never wraps or pads the width. */
+@utility tile {
+  @apply flex min-w-0 flex-col gap-1.5 font-mono text-[11px] leading-tight whitespace-nowrap text-muted;
+  &::before {
+    content: '';
+    @apply h-8 rounded-[2px] border border-accent/50 bg-accent/15;
+  }
+}
+
+@layer base {
+  ::selection { background: var(--color-accent); color: var(--color-ink); }
+}
+
+.prose {
+  --tw-prose-body: var(--color-paper);
+  --tw-prose-headings: var(--color-paper);
+  --tw-prose-lead: var(--color-muted);
+  --tw-prose-code: var(--color-accent);
+  --tw-prose-links: var(--color-accent);
+}
+.prose :where(h2, h3) { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.01em; }
+.prose :where(h2) { border-top: 1px solid color-mix(in srgb, var(--color-paper) 12%, transparent); padding-top: 1.5em; }
+.prose :where(code)::before, .prose :where(code)::after { content: none; }
+.prose :where(code) { font-weight: 400; background: var(--color-ink-2); padding: 0.15em 0.4em; border-radius: 3px; }
