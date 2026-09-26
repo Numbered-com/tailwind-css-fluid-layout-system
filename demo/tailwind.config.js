@@ -1,4 +1,4 @@
-import fls from '../src/index.js'
+import fls from '../src/index.ts'
 import typography from '@tailwindcss/typography'
 
 export default {
