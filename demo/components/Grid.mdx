@@ -1,79 +1,88 @@
-<div className='sticky z-1 top-0 span-w-1 bg-red-500 ml-auto text-sm px-2'>Sticky</div>
+import { LiveReadout, Simulator, Playground } from './Demos'
 
 <span className="lead">
-  This plugin attempts to simplify fluid grid system implementation with deeply nested elements.
+  Describe the grid from your mockups once: columns, gutter, margin and mockup width per breakpoint. The plugin turns it into CSS variables that scale with the viewport, and into utilities that size, space and position anything on that grid, at any nesting depth.
 </span>
+
+<Simulator />
+
+```js
+// tailwind.config.js
+theme: {
+  grid: {
+    mobile:  { columns: 6,  gutter: 10, margin: 10, mockupWidth: 375 },
+    desktop: { columns: 12, gutter: 10, margin: 24, mockupWidth: 1440, screen: 'lg' }
+  }
+}
+```
+
+## How it works
+
+Each breakpoint writes four variables on `html`: `--column`, `--gutter`, `--margin` and `--grid-width`. They are expressed in `vw`, so a 1440px mockup renders pixel perfect at 1440px and keeps its proportions at every other width. The faint lines on this page are the grid guidelines.
+
+<LiveReadout />
+
+## Fluid type
+
+The root font size follows the same rule: `1rem` equals 16px at the mockup width and scales with it. Every rem based Tailwind value (font sizes, spacing, radii) scales in step with the grid, so type set in the mockup keeps its size relative to the layout. Set `fontScalingMaxWidth` to stop the growth on large screens; the simulator above marks where it kicks in.
 
 ## Columns
 
-Use the <code>span</code> utility to set the column count with a sizing prop.
+`span-*` sizes an element to a number of columns, gutters between them included.
 
-<div className="flex flex-col text-black text-sm text-center">
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-1">span-w-1</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2">span-w-2</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-3">span-w-3</div>
+<div className="flex flex-col">
+	<div className="tile span-w-1">span-w-1</div>
+	<div className="tile span-w-2">span-w-2</div>
+	<div className="tile span-w-3">span-w-3</div>
 </div>
 
-## Gutters
+Add `-wide` for one extra gutter, `-wider` for two. Handy for offsets that land on the next column.
 
-
-Use the <code>gutter</code> utility to set the gutter count with a sizing prop.
-
-<div className="flex text-black text-sm text-center">
-	<div className="bg-red-300 flex justify-center items-center h-20 span-ml-1 gutter-w-1"></div>
+<div className="flex flex-col">
+	<div className="tile span-w-2">span-w-2</div>
+	<div className="tile span-w-2-wide">span-w-2-wide</div>
+	<div className="tile span-w-2-wider">span-w-2-wider</div>
 </div>
 
-### With span
+## Gutters and margins
 
-You can use <code>wide</code> suffix to add one gutter to span, and <code>wider</code> to add two gutters.
+`gutter-*` and `margin-*` give multiples of the gutter and of the outer page margin.
 
-<div className="flex flex-col text-black text-sm text-center">
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2">span-w-2</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2-wide">span-w-2-wide</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2-wider">span-w-2-wider</div>
+<div className="flex gutter-gap-1">
+	<div className="tile span-w-2">span-w-2</div>
+	<div className="tile span-w-2">gutter-gap-1</div>
+	<div className="tile span-w-3">span-w-3</div>
 </div>
 
-### Spans & gutters
-
-Container with <code>gutter-gap-1</code> class.
-
-<div className="flex text-black text-sm text-center gutter-gap-1">
-	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2">span-w-2</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2">span-w-2</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 span-w-3">span-w-3</div>
+<div className="flex">
+	<div className="tile span-w-2">span-w-2</div>
+	<div className="tile span-w-2 gutter-ml-1">gutter-ml-1</div>
+	<div className="tile span-w-2 span-ml-1-wider">span-ml-1-wider</div>
 </div>
 
-Manual spacing.
+## Any property
 
-<div className="flex text-black text-sm text-center">
-	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2">span-w-2</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2 gutter-ml-1">span-w-2<br/>gutter-ml-1</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 span-w-2 span-ml-1-wider">span-w-2<br/>span-ml-1-wider</div>
-</div>
+The three prefixes combine with width, height, padding, margin, inset, gap, scroll spacing, border width and text indent. Counts can be fractional and negative: `span-w-1.5`, `span-w-1.5-wide`, `-span-ml-1`. Beyond the widest grid, use an arbitrary value: `span-w-[16]`.
 
+<Playground />
 
-### Margin
+## Nesting
 
-Use the <code>margin</code> utility to get outter margins if needed.
+CSS subgrid can pass the page grid down, but only if every wrapper in between is itself a subgrid. One flex row or positioned box breaks the chain. These utilities resolve to viewport units instead, not percentages of the parent, so `span-w-2` has the same width in the body, in a flex row, in a grid cell or in an absolutely positioned box four wrappers deep. Offset each level by whole columns and its content stays on the page grid, whatever the parent is.
 
-<div className="flex text-black text-sm text-center h-20 relative">
-	<div className="bg-red-300 flex justify-center items-center h-20 span-mr-2-wide margin-w-1 absolute right-full">margin-w-1</div>
-</div>
+<section className="nest w-fit span-pl-1-wide gutter-pr-1 lg:span-pr-1-wide" data-node="section · static">
+	<div className="nest relative flex span-pl-1-wide gutter-pr-1 lg:span-pr-1-wide" data-node="div · relative flex">
+		<article className="nest grid span-pl-1-wide gutter-pr-1" data-node="article · grid">
+			<div className="tile span-w-2">span-w-2</div>
+		</article>
+	</div>
+</section>
 
-## Arbitrary values
+## From mockup to class
 
-Every utility takes an arbitrary value, so a count doesn't have to be a whole number. It stays a multiplier of the grid: <code>span-w-[0.5]</code> resolves to <code>calc(0.5 \* var(--column) - 0.5 \* var(--gutter))</code>, never to <code>0.5px</code>.
+The bundled CLI converts a measured pixel width into the closest class.
 
-<div className="flex flex-col text-black text-sm text-center">
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-[0.5]">span-w-[0.5]</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-1">span-w-1</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-[1.5]">span-w-[1.5]</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-2">span-w-2</div>
-</div>
-
-Spreading instructions work too, with an underscore standing in for the space.
-
-<div className="flex flex-col text-black text-sm text-center">
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-[1.5]">span-w-[1.5]</div>
-	<div className="bg-red-300 flex justify-center items-center h-20 gutter-mb-1 span-w-[1.5_wide]">span-w-[1.5_wide]</div>
-</div>
+```bash
+bunx px-to-cols 330 --columns 24 --mockup 1440 --gutter 24 --margin 24
+# → span-w-6 (330px, exact)
+```
