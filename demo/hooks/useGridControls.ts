@@ -4,7 +4,10 @@ export const toggleGrid = () => {
   const visibility = localStorage.getItem('guidelinesVisibility') === 'hidden' ? 'inherit' : 'hidden'
   localStorage.setItem('guidelinesVisibility', visibility)
   document.body.style.setProperty('--guidelines-visibility', visibility)
+  window.dispatchEvent(new Event('guidelines'))
 }
+
+export const guidelinesVisible = () => localStorage.getItem('guidelinesVisibility') !== 'hidden'
 
 const useGridControls = () => {
   const keyPressed = useRef(false)

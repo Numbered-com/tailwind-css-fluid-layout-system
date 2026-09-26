@@ -1,6 +1,36 @@
 import Head from 'next/head'
-import { toggleGrid } from '../hooks/useGridControls'
+import { useEffect, useState } from 'react'
+import { guidelinesVisible, toggleGrid } from '../hooks/useGridControls'
 import MarkdownSample from '../components/Grid.mdx'
+
+function GridToggle() {
+  const [on, setOn] = useState(true)
+
+  useEffect(() => {
+    const sync = () => setOn(guidelinesVisible())
+    sync()
+    window.addEventListener('guidelines', sync)
+    return () => window.removeEventListener('guidelines', sync)
+  }, [])
+
+  return (
+    <button
+      type='button'
+      role='switch'
+      aria-checked={on}
+      onClick={toggleGrid}
+      className='group flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.2em] text-muted hover:text-paper transition'>
+      Grid
+      <span
+        aria-hidden='true'
+        className={`relative h-4 w-7 rounded-full outline outline-1 -outline-offset-1 transition duration-500 ease-expo motion-reduce:transition-none ${on ? 'outline-accent bg-accent/15' : 'outline-paper/30'}`}>
+        <span
+          className={`absolute top-[3px] left-[3px] size-2.5 rounded-full transition duration-500 ease-expo motion-reduce:transition-none ${on ? 'translate-x-3 bg-accent' : 'bg-paper/50 group-hover:bg-paper'}`}
+        />
+      </span>
+    </button>
+  )
+}
 
 export default function Index() {
   return (
@@ -12,17 +42,15 @@ export default function Index() {
         <div className='grid-container flex h-14 items-center'>
           <div className='flex w-full items-center justify-between lg:span-w-8 lg:span-ml-2-wide'>
             <span className='flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em]'>
-              <svg aria-hidden='true' className='h-3.5 w-3.5 text-accent' viewBox='0 0 14 14' fill='currentColor'>
-                <rect x='0' width='3' height='14' />
-                <rect x='5.5' width='3' height='14' />
-                <rect x='11' width='3' height='14' />
+              <svg aria-hidden='true' className='h-4 w-4 text-accent' viewBox='0 0 16 16' fill='currentColor'>
+                <rect x='0' width='2' height='16' />
+                <rect x='4' width='4' height='16' />
+                <rect x='10' width='6' height='16' />
               </svg>
               Fluid Layout System
             </span>
             <div className='flex items-center gap-5'>
-            <button type='button' onClick={toggleGrid} aria-label='Toggle grid guidelines' className='font-mono text-xs uppercase tracking-[0.2em] text-muted hover:text-accent transition'>
-              Grid
-            </button>
+            <GridToggle />
             <a
               href='https://github.com/Numbered-com/tailwind-css-fluid-layout-system'
               className='inline-flex items-center gap-2 text-sm text-muted hover:text-accent transition'>

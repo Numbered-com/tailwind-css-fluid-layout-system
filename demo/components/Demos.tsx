@@ -130,14 +130,14 @@ export function Simulator() {
       </div>
 
       <div className='mt-4'>
-        <div className='@container' style={{ width: `${(width / MAX) * 100}%` }}>
+        <div className='@container transition-[width] duration-300 ease-expo motion-reduce:transition-none' style={{ width: `${(width / MAX) * 100}%` }}>
         <div
           className='relative flex h-32 overflow-hidden outline outline-1 -outline-offset-1 outline-paper/30'
           style={{ paddingInline: pct(g.margin), gap: pct(gut) }}>
           {Array.from({ length: g.columns }, (_, i) => (
             <div key={i} aria-hidden='true' className='flex-1 bg-accent/10 border-x border-accent/30' />
           ))}
-          <p className='absolute bottom-3 font-serif leading-none whitespace-nowrap' style={{ left: pct(g.margin), fontSize: root * 2.25 }}>
+          <p className='absolute bottom-3 font-serif leading-none whitespace-nowrap transition-[font-size] duration-300 ease-expo motion-reduce:transition-none' style={{ left: pct(g.margin), fontSize: root * 2.25 }}>
             Aa <span className='font-mono text-[10px] text-muted'>text-4xl · {fmt(root * 2.25)}</span>
           </p>
         </div>
@@ -167,11 +167,22 @@ const fns = { span, gutter, margin }
 
 export function Playground() {
   const [prefix, setPrefix] = useState<keyof typeof fns>('span')
-  const [count, setCount] = useState(3)
+  const [rawCount, setCount] = useState(3)
   const [suffix, setSuffix] = useState('')
   const bar = useRef<HTMLDivElement>(null)
+  // Text column width: 8 cols on lg, 6 below. -wide/-wider may spill into the gutters past it.
+  const [maxSpan, setMaxSpan] = useState(6)
+  useEffect(() => {
+    const mq = matchMedia(`(min-width: ${screens.lg}px)`)
+    const update = () => setMaxSpan(mq.matches ? 8 : 6)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
   const [px, setPx] = useState(0)
 
+  const max = prefix === 'span' ? maxSpan : 4
+  const count = Math.min(rawCount, max)
   const spread = prefix === 'span' ? suffix : ''
   const whole = Number.isInteger(count)
   const value = whole && !spread ? count : `${count}${spread ? ` ${spread}` : ''}`
@@ -213,7 +224,7 @@ export function Playground() {
           type='range'
           aria-label={`${prefix} count`}
           min='0.5'
-          max={prefix === 'span' ? 8 : 4}
+          max={max}
           step='0.5'
           value={count}
           onChange={e => setCount(+e.target.value)}
@@ -221,7 +232,7 @@ export function Playground() {
         />
       </div>
 
-      <div ref={bar} onTransitionEnd={() => setPx(bar.current!.getBoundingClientRect().width)} className='mt-6 h-8 max-w-full rounded-[2px] border border-accent/50 bg-accent/15 transition-[width] duration-500 ease-expo motion-reduce:transition-none' style={{ width: css }} />
+      <div ref={bar} onTransitionEnd={() => setPx(bar.current!.getBoundingClientRect().width)} className='mt-6 h-8 rounded-[2px] border border-accent/50 bg-accent/15 transition-[width] duration-500 ease-expo motion-reduce:transition-none' style={{ width: css }} />
 
       <div className='mt-4 space-y-1 font-mono text-xs'>
         <p className='text-accent'>{className}</p>
