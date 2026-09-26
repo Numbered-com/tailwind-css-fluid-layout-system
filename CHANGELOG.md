@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Fractional spans now include the gutter before their partial column: `span-w-[6.5]` is `6.5 * var(--column) + 6 * var(--gutter)` and ends mid-column 7 (previously `+ 5.5`, half a gutter short). Whole spans are unchanged.
+- Source migrated to TypeScript; the package now ships compiled `dist/` JS with `.d.ts` typings (built by `tsc` on `prepublishOnly`). Exported types: `Grid`, `PixelsToColumnsResult`.
 
 ## [1.0.0] - 2026-06-28
 

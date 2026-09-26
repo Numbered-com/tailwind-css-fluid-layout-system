@@ -11,7 +11,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 // through Tailwind's candidate parsing before reaching the plugin.
 const css = async (classes) => {
 	const compiler = await compile(
-		`@import "tailwindcss";\n@plugin "${root}/src/index.js";`,
+		`@import "tailwindcss";\n@plugin "${root}/src/index.ts";`,
 		{
 			base: root,
 			async loadStylesheet(id, base) {

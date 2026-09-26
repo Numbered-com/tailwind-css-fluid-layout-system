@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { fileURLToPath } from "node:url";
-import { pixelsToColumns } from "./grid-math.js";
+import { pixelsToColumns } from "./grid-math.ts";
 
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 
@@ -25,9 +25,9 @@ Examples:
   px-to-cols 150 --columns 6  --mockup 375  --gutter 12 --margin 12 --json
   echo '[{"pixels":330,"columns":24,"mockupWidth":1440,"gutter":24,"margin":24}]' | px-to-cols --batch`;
 
-function parseArgs(argv) {
-	const opts = { columns: 24, mockup: 1440, gutter: 24, margin: 24, json: false };
-	let pixels;
+function parseArgs(argv: string[]) {
+	const opts = { columns: 24, mockup: 1440, gutter: 24, margin: 24, json: false, help: false };
+	let pixels: number | undefined;
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
 		if (a === "--json") opts.json = true;
@@ -42,7 +42,7 @@ function parseArgs(argv) {
 }
 
 function readStdin() {
-	return new Promise((resolve) => {
+	return new Promise<string>((resolve) => {
 		let data = "";
 		process.stdin.setEncoding("utf8");
 		process.stdin.on("data", (chunk) => {

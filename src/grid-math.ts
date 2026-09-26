@@ -1,5 +1,17 @@
 // Pure grid math — no Tailwind/runtime dependencies, so it can be imported by
-// both the plugin (index.js) and the standalone CLI (cli.js).
+// both the plugin (index.ts) and the standalone CLI (cli.ts).
+
+export type Grid = {
+	columns: number;
+	mockupWidth: number;
+	/** px (>= 1) or a ratio of the grid width per column (< 1) */
+	gutter: number;
+	margin: number;
+	/** theme `screens` key the grid applies from */
+	screen?: string;
+	maxWidth?: number;
+	fontScalingMaxWidth?: number;
+};
 
 /**
  * Span
@@ -7,13 +19,16 @@
  * @param col n | n-wide | n-wider
  * @param grid
  */
-const span = (col = 1, grid = null) => {
-	let count;
-	let spreadingInstruction;
+function span(col: number | string, grid: Grid): number;
+function span(col?: number | string, grid?: null): string | 0;
+function span(col: number | string = 1, grid: Grid | null = null): number | string {
+	let count: number;
+	let spreadingInstruction: string | undefined;
 
 	if (typeof col === "string") {
-		[count, spreadingInstruction] = col.split(" ");
-		count = parseFloat(count);
+		const [n, s] = col.split(" ");
+		count = parseFloat(n);
+		spreadingInstruction = s;
 	} else {
 		count = col;
 	}
@@ -49,7 +64,7 @@ const span = (col = 1, grid = null) => {
 
 		return `calc(${count} * var(--column) ${sign} ${Math.abs(gutters)} * var(--gutter))`;
 	}
-};
+}
 
 /**
  * Gutter
@@ -57,13 +72,15 @@ const span = (col = 1, grid = null) => {
  * @param count n
  * @param grid
  */
-const gutter = (count = 1, grid = null) => {
+function gutter(count: number, grid: Grid): number;
+function gutter(count?: number | string, grid?: null): string;
+function gutter(count: number | string = 1, grid: Grid | null = null): number | string {
 	return grid
-		? count * grid.gutter
-		: count === 1
+		? +count * grid.gutter
+		: +count === 1
 			? "var(--gutter)"
 			: `calc(${count} * var(--gutter))`;
-};
+}
 
 /**
  * Margin
@@ -71,22 +88,40 @@ const gutter = (count = 1, grid = null) => {
  * @param count n
  * @param grid
  */
-const margin = (count = 1, grid = null) => {
+function margin(count: number, grid: Grid): number;
+function margin(count?: number | string, grid?: null): string;
+function margin(count: number | string = 1, grid: Grid | null = null): number | string {
 	return grid
-		? count * grid.margin
-		: count === 1
+		? +count * grid.margin
+		: +count === 1
 			? "var(--margin)"
 			: `calc(${count} * var(--margin))`;
+}
+
+export type PixelsToColumnsResult = {
+	className: string;
+	columns: number;
+	gutters?: number;
+	actualWidth: number;
+	pixelDifference: number;
+	gridConfig: {
+		columns: number;
+		mockupWidth: number;
+		gutter: number;
+		margin: number;
+		columnWidth: number;
+		contentWidth: number;
+	};
 };
 
 /**
  * Pixels → columns: the inverse of span(). Gutter and margin are in px.
  * Finds the closest grid span (or gutter multiple for sub-column values).
- * @param {number} pixels - The pixel value to convert
- * @param {{columns:number, mockupWidth:number, gutter:number, margin:number}} grid
- * @return {{className:string, columns:number, gutters?:number, actualWidth:number, pixelDifference:number, gridConfig:object}}
  */
-const pixelsToColumns = (pixels, grid) => {
+const pixelsToColumns = (
+	pixels: number,
+	grid: Pick<Grid, "columns" | "mockupWidth" | "gutter" | "margin">,
+): PixelsToColumnsResult => {
 	const { columns, mockupWidth, margin: marginPx } = grid;
 	const contentWidth = mockupWidth - 2 * marginPx;
 	const columnWidth = span(1, grid);
@@ -104,7 +139,7 @@ const pixelsToColumns = (pixels, grid) => {
 	// Sub-column values: match against gutter multiples.
 	if (pixels < columnWidth) {
 		const multiples = [0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6];
-		let best = null;
+		let best!: { mult: number; px: number };
 		let bestDiff = Infinity;
 		for (const mult of multiples) {
 			const px = gutterPx * mult;
@@ -125,14 +160,14 @@ const pixelsToColumns = (pixels, grid) => {
 	}
 
 	// Whole-column spans, with optional wide/wider spreading.
-	const widthFor = (n, suffix) =>
+	const widthFor = (n: number, suffix: string) =>
 		suffix === "-wide"
 			? span(`${n} wide`, grid)
 			: suffix === "-wider"
 				? span(`${n} wider`, grid)
 				: span(n, grid);
 
-	let best = null;
+	let best!: { columns: number; suffix: string; width: number };
 	let bestDiff = Infinity;
 	for (let n = 1; n <= columns && bestDiff !== 0; n++) {
 		for (const suffix of ["", "-wide", "-wider"]) {

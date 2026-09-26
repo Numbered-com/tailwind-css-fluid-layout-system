@@ -1,13 +1,31 @@
-import plugin from "tailwindcss/plugin.js";
+import plugin from "tailwindcss/plugin";
+import type { PluginAPI, PluginWithConfig } from "tailwindcss/plugin";
+import { span, gutter, margin, pixelsToColumns, type Grid } from "./grid-math.ts";
+
+type Screen = string | { min?: string; max?: string };
+type GridFn = (count: number | string) => number | string;
+type CssInJs = Parameters<PluginAPI["addBase"]>[0];
+type Options = {
+	fluidUnit?: (value: number) => string;
+	guidelines?: boolean;
+	color?: string;
+	guidelinesSelector?: string;
+};
+
+/** Mirrors Tailwind's `PluginWithOptions<Options>`, which it doesn't export. */
+type FluidLayoutPlugin = {
+	(options?: Options): PluginWithConfig;
+	__isOptionsFunction: true;
+};
 
 /**
  * Default fluid unit computation
  * @param {number} value - The fluid percentage value (e.g., 26.6667 for ~26.67vw)
  * @returns {string} - CSS value with unit
  */
-const defaultFluidUnit = (value) => `${value.toPrecision(6)}vw`;
+const defaultFluidUnit = (value: number) => `${value.toPrecision(6)}vw`;
 
-const utilities = {
+const utilities: Record<string, string | string[]> = {
 	w: "width",
 	"min-w": "min-width",
 	"max-w": "max-width",
@@ -64,8 +82,6 @@ const utilities = {
 
 // -----------------------------------------------------o spans & gutters
 
-import { span, gutter, margin, pixelsToColumns } from "./grid-math.js";
-
 const gridContainer = () => {
 	return {
 		".grid-container": {
@@ -81,7 +97,7 @@ const gridContainer = () => {
 	};
 };
 
-const guideline = (grid, color = "red") => {
+const guideline = (grid: Grid, color = "red") => {
 	let style = `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="${color}" width="100%">`;
 
 	for (let i = 0; i < grid.columns; i++) {
@@ -106,40 +122,41 @@ const guideline = (grid, color = "red") => {
 	return style;
 };
 
-const guidelines = (grids, screens, color = "red", selector = "body") => {
-	const o = {
-		[selector]: {
-			"&::after": {
-				content: "''",
-				position: "fixed",
-				"z-index": 99999,
-				width: "calc(var(--grid-width) + 2 * var(--margin))",
-				height: "100%",
-				top: 0,
-				left: "50%",
-				transform: "translateX(-50%)",
-				"pointer-events": "none",
-				background: guideline(grids.mobile, color),
-				visibility: 'var(--guidelines-visibility, "inherit")',
-			},
-		},
+const guidelines = (
+	grids: Record<string, Grid>,
+	screens: Record<string, Screen>,
+	color = "red",
+	selector = "body",
+) => {
+	const after: CssInJs = {
+		content: "''",
+		position: "fixed",
+		"z-index": "99999",
+		width: "calc(var(--grid-width) + 2 * var(--margin))",
+		height: "100%",
+		top: "0",
+		left: "50%",
+		transform: "translateX(-50%)",
+		"pointer-events": "none",
+		background: guideline(grids.mobile, color),
+		visibility: 'var(--guidelines-visibility, "inherit")',
 	};
 
-	for (const [key, grid] of Object.entries(grids)) {
+	for (const grid of Object.values(grids)) {
 		if (grid.screen) {
-			o[selector]["&::after"][parseScreen(screens[grid.screen])] = {
+			after[parseScreen(screens[grid.screen])!] = {
 				background: guideline(grid, color),
 			};
 		}
 	}
 
-	return o;
+	return { [selector]: { "&::after": after } };
 };
 
 // -----------------------------------------------------o Plugin
 
-const parseScreen = (screen) => {
-	if (typeof screen === "string" && !screen.max) {
+const parseScreen = (screen: Screen) => {
+	if (typeof screen === "string") {
 		return `@media (min-width: ${screen})`;
 	} else if (typeof screen === "object") {
 		return `@media (${screen.min !== undefined ? `min-width: ${screen.min}` : ""}${screen.min !== undefined && screen.max !== undefined ? ") and (" : ""}${
@@ -153,15 +170,20 @@ const parseScreen = (screen) => {
 // negation and fold the sign into the count before the math fns parse it.
 const negated = /^calc\((.+) \* -1\)$/;
 
-const resolveValue = (fn, value) => {
+const resolveValue = (fn: GridFn, value: unknown) => {
 	const match = `${value}`.match(negated);
-	if (!match) return fn(value);
+	if (!match) return fn(value as number | string);
 
 	const [count, spreading] = match[1].split(" ");
 	return fn(spreading ? `-${count} ${spreading}` : -parseFloat(count));
 };
 
-const matchUtilitiesFor = (key, fn, matchUtilities, values) => {
+const matchUtilitiesFor = (
+	key: string,
+	fn: GridFn,
+	matchUtilities: PluginAPI["matchUtilities"],
+	values: Record<string, string>,
+) => {
 	for (const utility in utilities) {
 		const element = utilities[utility];
 
@@ -171,10 +193,7 @@ const matchUtilitiesFor = (key, fn, matchUtilities, values) => {
 					const resolved = `${resolveValue(fn, value)}`;
 
 					return Array.isArray(element)
-						? element.reduce((result, item) => {
-								result[item] = resolved;
-								return result;
-							}, {})
+						? Object.fromEntries(element.map((property) => [property, resolved]))
 						: { [element]: resolved };
 				},
 			},
@@ -183,12 +202,13 @@ const matchUtilitiesFor = (key, fn, matchUtilities, values) => {
 	}
 };
 
-const grid = plugin.withOptions(
+const grid: FluidLayoutPlugin = plugin.withOptions<Options>(
 	(options) => {
 		return (props) => {
 			const { matchUtilities, addBase, addComponents, theme } = props;
 
-			const grids = theme("grid");
+			const grids = theme("grid") as Record<string, Grid>;
+			const screens = theme("screens") as Record<string, Screen>;
 			if (grids.mobile === undefined)
 				throw new Error(`grid.mobile is the default and cannot be undefined`);
 
@@ -199,7 +219,7 @@ const grid = plugin.withOptions(
 			 * @param {number} fluidValue - The fluid percentage value
 			 * @returns {string} - CSS calc expression
 			 */
-			const computeFluidValue = (fluidValue) => {
+			const computeFluidValue = (fluidValue: number) => {
 				return `calc(${fluidUnit(fluidValue)} - var(--sbw) * ${(fluidValue / 100).toPrecision(6)})`;
 			};
 
@@ -213,9 +233,7 @@ const grid = plugin.withOptions(
 					throw new Error(`columns is required for ${key}`);
 				if (grid.mockupWidth === undefined)
 					throw new Error(`mockupWidth is required for ${key}`);
-				const mediaQuery = grid.screen
-					? parseScreen(theme("screens")[grid.screen])
-					: null;
+				const mediaQuery = grid.screen ? parseScreen(screens[grid.screen]) : null;
 
 				// base
 
@@ -304,20 +322,17 @@ const grid = plugin.withOptions(
 
 			// utilities
 
-			const maxColumns =
-				Object.entries(grids).reduce((max, entry) =>
-					entry[1].columns >= max[1].columns ? entry : max,
-				)?.[1].columns ?? 0;
+			const maxColumns = Math.max(...Object.values(grids).map((g) => g.columns));
 
 			// Values stay grid instructions, not CSS: the utility callback runs them
 			// through the math fns, so arbitrary values (`span-w-[0.665]`) take the
 			// exact same path as named ones.
 			const getValues = (withExpansion = false) => {
-				const values = {};
-				new Array(maxColumns).fill(null).forEach((v, i) => {
+				const values: Record<string, string> = {};
+				Array.from({ length: maxColumns }, (_, i) => {
 					const j = i + 1;
 
-					values[j] = j;
+					values[j] = `${j}`;
 
 					if (withExpansion) {
 						values[`${j}-wide`] = `${j} wide`;
@@ -341,7 +356,7 @@ const grid = plugin.withOptions(
 				addBase(
 					guidelines(
 						grids,
-						theme("screens"),
+						screens,
 						options?.color || "red",
 						options?.guidelinesSelector || "body",
 					),
