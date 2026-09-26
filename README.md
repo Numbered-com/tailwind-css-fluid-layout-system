@@ -1,6 +1,6 @@
 # Tailwind CSS Fluid Layout System
 
-![Fluid Layout System: a fluid grid system that scales with the viewport, with span, gutter and offset utilities](docs/hero.jpg)
+![Fluid Layout System: a fluid grid system that scales with the viewport, with span, gutter and offset utilities](https://raw.githubusercontent.com/Numbered-com/tailwind-css-fluid-layout-system/main/docs/hero.jpg)
 
 A [Tailwind CSS v4](https://tailwindcss.com/) plugin that turns your design grid into fluid utilities, plus a `px-to-cols` CLI to translate mockup pixels into grid classes. 👉 [Demo](https://fls.numbered.studio)
 
