@@ -13,14 +13,31 @@ const Frame = ({ title, children }: { title: string; children: React.ReactNode }
 )
 
 const Stats = ({ items }: { items: [string, string][] }) => (
-  <dl className='grid grid-cols-2 gap-x-6 gap-y-3 font-mono text-xs md:grid-cols-4'>
-    {items.map(([label, value]) => (
-      <div key={label}>
-        <dt className='text-muted'>{label}</dt>
-        <dd className='mt-1 text-paper tabular-nums'>{value}</dd>
-      </div>
-    ))}
+  <dl className='grid grid-cols-2 gap-x-6 gap-y-6 md:grid-cols-4'>
+    {items.map(([label, value]) => {
+      // Big figure, small unit/suffix: "106.8px" -> "106.8" + "px".
+      const [, figure, rest] = value.match(/^([\d.]+)(.*)$/) ?? [, value, '']
+      return (
+        <div key={label} className='border-t border-paper/10 pt-3'>
+          <dt className='font-mono text-[10px] tracking-wide text-muted'>{label}</dt>
+          <dd className='mt-2 flex items-baseline gap-1 text-paper tabular-nums'>
+            <span className='text-2xl leading-none tracking-tight md:text-3xl'>{figure}</span>
+            <span className='font-mono text-xs text-muted'>{rest}</span>
+          </dd>
+        </div>
+      )
+    })}
   </dl>
+)
+
+const Figure = ({ label, value, unit = '' }: { label: string; value: number; unit?: string }) => (
+  <p className='flex flex-col gap-2'>
+    <span className='font-mono text-[10px] tracking-wide text-muted'>{label}</span>
+    <span className='flex items-baseline gap-1 tabular-nums'>
+      <span className='text-4xl leading-none tracking-tight text-paper'>{value}</span>
+      <span className='font-mono text-xs text-muted'>{unit}</span>
+    </span>
+  </p>
 )
 
 const activeGrid = (width: number) =>
@@ -71,7 +88,7 @@ export function LiveReadout() {
       {stats && (
         <Stats
           items={[
-            ['grid', `${stats.name} · ${stats.viewport}px`],
+            ['viewport', `${stats.viewport}px · ${stats.name}`],
             ['--grid-width', fmt(stats.gw)],
             ['--column', fmt(stats.col)],
             ['--gutter', fmt(stats.gut)],
@@ -100,9 +117,7 @@ export function Simulator() {
 
   return (
     <Frame title='Simulator'>
-      <p className='flex items-baseline gap-2 font-mono text-xs text-muted'>
-        Viewport width <span className='tabular-nums text-paper'>{width}px</span>
-      </p>
+      <Figure label='viewport width' value={width} unit={`px · ${name}`} />
 
       <div className='relative mt-2 pb-5'>
         <input
@@ -148,7 +163,7 @@ export function Simulator() {
       <div className='mt-6'>
         <Stats
           items={[
-            ['grid', `${name} · ${g.columns} cols`],
+            ['grid', `${g.columns} cols · ${name}`],
             ['mockupWidth', `${g.mockupWidth}px`],
             ['fontScalingMaxWidth', g.fontScalingMaxWidth ? `${g.fontScalingMaxWidth}px` : 'none'],
             ['--grid-width', fmt((g.mockupWidth - 2 * g.margin) * scale)],
@@ -216,9 +231,9 @@ export function Playground() {
           ))}
       </div>
 
-      <p className='mt-6 flex items-baseline gap-2 font-mono text-xs text-muted'>
-        Count <span className='tabular-nums text-paper'>{count}</span>
-      </p>
+      <div className='mt-6'>
+        <Figure label='count' value={count} unit={prefix === 'span' ? (count === 1 ? 'column' : 'columns') : `× --${prefix}`} />
+      </div>
       <div className='mt-2'>
         <input
           type='range'
