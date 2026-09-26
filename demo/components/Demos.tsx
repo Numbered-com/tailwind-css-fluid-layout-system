@@ -6,7 +6,7 @@ const screens: Record<string, number> = { md: 768, lg: 1024 }
 const fmt = (n: number) => `${n.toFixed(1)}px`
 
 const Frame = ({ title, children }: { title: string; children: React.ReactNode }) => (
-  <div className='not-prose my-8 rounded-md border border-paper/10 bg-ink-2 p-4 md:p-6'>
+  <div className='not-prose my-10'>
     <p className='mb-4 font-mono text-[11px] uppercase tracking-[0.2em] text-muted'>{title}</p>
     {children}
   </div>
@@ -205,8 +205,10 @@ export function Playground() {
           ))}
       </div>
 
-      <label className='mt-4 flex items-center gap-3 font-mono text-xs'>
-        <span className='w-[3ch] shrink-0 tabular-nums text-paper'>{count}</span>
+      <p className='mt-6 flex items-baseline gap-2 font-mono text-xs text-muted'>
+        Count <span className='tabular-nums text-paper'>{count}</span>
+      </p>
+      <div className='mt-2'>
         <input
           type='range'
           aria-label={`${prefix} count`}
@@ -217,9 +219,9 @@ export function Playground() {
           onChange={e => setCount(+e.target.value)}
           className='range'
         />
-      </label>
+      </div>
 
-      <div ref={bar} className='mt-6 h-8 max-w-full rounded-[2px] border border-accent/50 bg-accent/15 transition-[width] motion-reduce:transition-none' style={{ width: css }} />
+      <div ref={bar} onTransitionEnd={() => setPx(bar.current!.getBoundingClientRect().width)} className='mt-6 h-8 max-w-full rounded-[2px] border border-accent/50 bg-accent/15 transition-[width] duration-500 ease-expo motion-reduce:transition-none' style={{ width: css }} />
 
       <div className='mt-4 space-y-1 font-mono text-xs'>
         <p className='text-accent'>{className}</p>

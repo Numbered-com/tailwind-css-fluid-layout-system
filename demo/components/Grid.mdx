@@ -4,6 +4,8 @@ import { LiveReadout, Simulator, Playground } from './Demos'
   Describe the grid from your mockups once: columns, gutter, margin and mockup width per breakpoint. The plugin turns it into CSS variables that scale with the viewport, and into utilities that size, space and position anything on that grid, at any nesting depth.
 </span>
 
+<Simulator />
+
 ```js
 // tailwind.config.js
 theme: {
@@ -22,9 +24,7 @@ Each breakpoint writes four variables on `html`: `--column`, `--gutter`, `--marg
 
 ## Fluid type
 
-The root font size follows the same rule: `1rem` equals 16px at the mockup width and scales with it. Every rem based Tailwind value (font sizes, spacing, radii) scales in step with the grid, so type set in the mockup keeps its size relative to the layout. Set `fontScalingMaxWidth` to stop the growth on large screens.
-
-<Simulator />
+The root font size follows the same rule: `1rem` equals 16px at the mockup width and scales with it. Every rem based Tailwind value (font sizes, spacing, radii) scales in step with the grid, so type set in the mockup keeps its size relative to the layout. Set `fontScalingMaxWidth` to stop the growth on large screens; the simulator above marks where it kicks in.
 
 ## Columns
 
