@@ -30,7 +30,7 @@ const Stats = ({ items }: { items: [string, string][] }) => (
   </dl>
 )
 
-const Figure = ({ label, value, unit = '' }: { label: string; value: number; unit?: string }) => (
+const Figure = ({ label, value, unit = '' }: { label: string; value: number | string; unit?: string }) => (
   <p className='flex flex-col gap-2'>
     <span className='font-mono text-[10px] tracking-wide text-muted'>{label}</span>
     <span className='flex items-baseline gap-1 tabular-nums'>
@@ -232,7 +232,7 @@ export function Playground() {
       </div>
 
       <div className='mt-6'>
-        <Figure label='count' value={count} unit={prefix === 'span' ? (count === 1 ? 'column' : 'columns') : `× --${prefix}`} />
+        <Figure label='count' value={count.toFixed(1)} unit={prefix === 'span' ? (count === 1 ? 'column' : 'columns') : `× --${prefix}`} />
       </div>
       <div className='mt-2'>
         <input
