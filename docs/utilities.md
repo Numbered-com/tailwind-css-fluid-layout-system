@@ -7,9 +7,10 @@
 - **`margin-`**: outer grid margins.
 
 ```html
-<article class="grid-container">
-  <div class="span-w-4 lg:span-w-8 lg:span-ml-2-wide gutter-gap-0.5 margin-pl-1">…</div>
-</article>
+<section class="grid-container">
+  <div class="flex span-w-4 lg:span-w-8 lg:span-ml-2-wide gutter-gap-1">…</div>
+  <div class="grid-container-full margin-px-1">…</div>
+</section>
 ```
 
 - Utilities: `w` `h` `min-*` `max-*`, `p*`, `m*`, `scroll-m*`, `scroll-p*`, `inset*` `top` `right` `bottom` `left`, `gap*`, `border*`, `indent`.

@@ -38,9 +38,9 @@ export default {
 ```
 
 ```html
-<article class="grid-container">
-  <div class="span-w-4 lg:span-w-8 lg:span-ml-2-wide gutter-gap-0.5">…</div>
-</article>
+<section class="grid-container">
+  <div class="flex span-w-4 lg:span-w-8 lg:span-ml-2-wide gutter-gap-1">…</div>
+</section>
 ```
 
 ## Docs
