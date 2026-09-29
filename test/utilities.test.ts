@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { compile } from "tailwindcss";
-import { gutter, pixelsToColumns } from "../src/grid-math.ts";
+import { gutter, pixelsToColumns, spacingClass } from "../src/grid-math.ts";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -356,7 +356,28 @@ describe("pixelsToColumns", () => {
 	});
 
 	test("values wider than a gutter align to columns, not gutter multiples", () => {
-		expect(className(48)).toBe("span-w-1-wide");
+		expect(className(56)).toBe("span-w-1-wide");
 		expect(className(96)).toBe("span-w-2");
+	});
+
+	test("a quarter gutter from the closest class is still on-grid", () => {
+		expect(pixelsToColumns(41, grid)).toMatchObject({ className: "span-w-1", snapped: true });
+	});
+
+	test("beyond a quarter gutter, an off-grid value becomes a spacing class", () => {
+		expect(pixelsToColumns(42, grid)).toMatchObject({ className: "gap-10.5", snapped: false, pixelDifference: 0 });
+		expect(pixelsToColumns(42, grid, 1).className).toBe("gap-42");
+	});
+});
+
+describe("spacingClass", () => {
+	test("px on the 0.25-step scale become bare spacing values", () => {
+		expect(spacingClass(12)).toBe("gap-3");
+		expect(spacingClass(13)).toBe("gap-3.25");
+		expect(spacingClass(13.5, 1)).toBe("gap-13.5");
+	});
+
+	test("px off the step scale fall back to rem at 16px per rem", () => {
+		expect(spacingClass(13.5)).toBe("gap-[0.84375rem]");
 	});
 });

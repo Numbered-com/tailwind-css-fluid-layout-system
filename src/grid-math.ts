@@ -80,6 +80,8 @@ const margin = multiple("margin", (grid) => grid.margin ?? 0);
 
 export type PixelsToColumnsResult = {
 	className: string;
+	/** false: off-grid, `className` is a Tailwind spacing class for the exact px */
+	snapped: boolean;
 	columns: number;
 	gutters?: number;
 	actualWidth: number;
@@ -94,13 +96,28 @@ export type PixelsToColumnsResult = {
 	};
 };
 
+/** Mockup px → rem: the plugin makes 1rem = 16 mockup px at every grid. */
+const rem = (pixels: number) => `${+(pixels / 16).toPrecision(6)}rem`;
+
+/**
+ * Mockup px → Tailwind spacing class (`gap-3`). `spacing` is px per `--spacing`
+ * step at the mockup width (`4` for Tailwind's `0.25rem`, `1` for `calc(1rem / 16)`).
+ * Off the 0.25-step scale, falls back to rem.
+ */
+const spacingClass = (pixels: number, spacing = 4) => {
+	const step = pixels / spacing;
+	return `gap-${Number.isInteger(step * 4) ? step : `[${rem(pixels)}]`}`;
+};
+
 /**
  * Pixels → columns: the inverse of span(). Gutter and margin are in px.
- * Finds the closest span, or gutter gap (≤ 1 gutter) for small spacing.
+ * Finds the closest span, or gutter gap (≤ 1 gutter) for small spacing. Beyond a
+ * quarter gutter from it, the value is off-grid: returns `spacingClass` instead.
  */
 const pixelsToColumns = (
 	pixels: number,
 	grid: Grid,
+	spacing = 4,
 ): PixelsToColumnsResult => {
 	const { columns, mockupWidth, margin: marginPx = 0 } = grid;
 	const { gridWidth: contentWidth, gutter: gutterPx, column: columnWidth } = metrics(grid);
@@ -128,8 +145,19 @@ const pixelsToColumns = (
 		),
 	].reduce((best, c) => (Math.abs(c.width - pixels) < Math.abs(best.width - pixels) ? c : best));
 
+	if (Math.abs(best.width - pixels) > gutterPx / 4)
+		return {
+			className: spacingClass(pixels, spacing),
+			snapped: false,
+			columns: 0,
+			actualWidth: pixels,
+			pixelDifference: 0,
+			gridConfig,
+		};
+
 	return {
 		className: best.className,
+		snapped: true,
 		columns: best.columns,
 		...(best.gutters !== undefined && { gutters: best.gutters }),
 		actualWidth: Math.round(best.width),
@@ -138,4 +166,4 @@ const pixelsToColumns = (
 	};
 };
 
-export { metrics, spreadings, span, gutter, margin, pixelsToColumns };
+export { metrics, spreadings, span, gutter, margin, rem, spacingClass, pixelsToColumns };

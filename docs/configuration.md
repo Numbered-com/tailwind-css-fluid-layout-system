@@ -36,4 +36,4 @@ The plugin sets a fluid root font size (`1rem` = 16px at `mockupWidth`) but leav
 }
 ```
 
-Grid utilities (`span-`, `gutter-`, `margin-`) and `px-to-cols` don't depend on `--spacing`, so they're the same with either setting.
+Grid utilities (`span-`, `gutter-`, `margin-`) don't depend on `--spacing`, so they're the same with either setting. `px-to-cols` takes it as `--spacing` (px per step: `1` or `4`) to write off-grid values as spacing classes.

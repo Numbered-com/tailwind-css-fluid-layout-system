@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `px-to-cols --spacing N` (px per `--spacing` step: `4` for `0.25rem`, `1` for `calc(1rem / 16)`) and `--no-grid`, which returns only the spacing class and rem value for vertical spacing and type sizes. Batch items take `spacing` and `grid: false`.
+- `spacingClass(px, spacing)` and `rem(px)` exports from `grid-math`.
+
+### Changed
+
+- `pixelsToColumns` / `px-to-cols` return a spacing class (`gap-3.25`, or `gap-[0.84375rem]` off the 0.25-step scale) with `snapped: false` when a value is more than a quarter gutter from its closest grid class; grid results carry `snapped: true`.
+
 ## [1.1.1] - 2026-09-26
 
 ## [1.1.0] - 2026-09-26
