@@ -13,7 +13,8 @@
 		"px-to-cols": "dist/cli.js"
 	},
 	"files": [
-		"dist"
+		"dist",
+		"skills"
 	],
 	"repository": {
 		"type": "git",

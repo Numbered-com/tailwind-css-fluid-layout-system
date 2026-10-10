@@ -1,10 +1,10 @@
 # Tailwind CSS Fluid Layout System
 
-[![Fluid Layout System: a fluid grid system that scales with the viewport, with span, gutter and offset utilities](https://raw.githubusercontent.com/Numbered-com/tailwind-css-fluid-layout-system/main/docs/hero.jpg)](https://fls.numbered.studio)
+[![Fluid Layout System: a fluid grid system that scales with the viewport, with span, gutter and offset utilities](https://raw.githubusercontent.com/Numbered-com/tailwind-css-fluid-layout-system/main/docs/hero.jpg)](https://fls.numbered.com)
 
 A [Tailwind CSS v4](https://tailwindcss.com/) plugin that turns your design grid into fluid utilities, plus a `px-to-cols` CLI to translate mockup pixels into grid classes.
 
-👉 **[Live demo](https://fls.numbered.studio)**
+👉 **[Live demo](https://fls.numbered.com)**
 
 ## Why not CSS subgrid?
 
@@ -41,6 +41,14 @@ export default {
 <section class="grid-container">
   <div class="flex span-w-4 lg:span-w-8 lg:span-ml-2-wide gutter-gap-1">…</div>
 </section>
+```
+
+### Agent skill
+
+The `fluid-layout` skill teaches coding agents to turn mockup px into grid classes through the CLI:
+
+```bash
+npx skills add https://fls.numbered.com
 ```
 
 ## Docs

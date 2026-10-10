@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `px-to-cols --spacing N` (px per `--spacing` step: `4` for `0.25rem`, `1` for `calc(1rem / 16)`) and `--no-grid`, which returns only the spacing class and rem value for vertical spacing and type sizes. Batch items take `spacing` and `grid: false`.
 - `spacingClass(px, spacing)` and `rem(px)` exports from `grid-math`.
+- The `fluid-layout` agent skill ships in the package and installs with `npx skills add https://fls.numbered.com`.
 
 ### Changed
 
