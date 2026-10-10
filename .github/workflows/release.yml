@@ -50,7 +50,11 @@ jobs:
       - name: Bump the plugin on the website
         working-directory: landing
         run: |
-          bun add "@numbered/tailwind-fluid-layout-system@^${GITHUB_REF_NAME#v}"
+          # A fresh publish takes a moment to reach the registry: retry for up to 5 minutes.
+          until bun add "@numbered/tailwind-fluid-layout-system@^${GITHUB_REF_NAME#v}"; do
+            (( ++tries < 30 )) || exit 1
+            sleep 10
+          done
           git diff --quiet && exit 0
           git config user.name "github-actions[bot]"
           git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
