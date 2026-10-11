@@ -1,23 +1,23 @@
 ---
 name: fluid-layout
-description: Use when building UI from Figma or mockups in a project using @numbered/tailwind-fluid-layout-system, or converting mockup px to span-/gutter-/margin- or spacing classes.
+description: Use when building UI from Figma or mockups in a project using @numbered/tailwind-fluid-layout-system, or converting mockup px to span-/gutter-/margin- grid classes.
 ---
 
-Every mockup px goes through the `px-to-cols` CLI: it _snaps_ a measurement to the closest grid class, or writes it as an exact spacing class when it is off-grid.
+The `px-to-cols` CLI resolves horizontal measurements to grid classes: it _snaps_ a measurement to the closest grid class, or writes it as an exact spacing class when it is off-grid.
 
 ## Steps
 
 1. **Load the grids.** Read `theme.grid` or `theme.extend.grid` in the JS Tailwind config (the file the CSS loads via `@config`; it may import a separate file); `theme.extend.grid` merges over the grids in the installed plugin's source. With neither key, stop and tell the user the project has no grid config. Each key is one breakpoint grid: `columns`, `mockupWidth`, `gutter`, `margin`, `screen`. Pass `gutter` as written. A missing `gutter` or `margin` is `0`.
 2. **Load the spacing step.** Read `--spacing` in the CSS `@theme`: `spacing` is its value in px at 16px per rem (`calc(1rem / 16)` → `1`, `0.25rem` → `4`). Done when every grid's four values and `spacing` are in hand; every CLI call carries all five.
-3. **Measure each frame against its grid.** Match each design frame to the grid whose `mockupWidth` equals the frame width. Collect every measurement: horizontal widths, offsets, padding and column gaps go against the grid; vertical spacing and type sizes get `"grid": false`.
-4. **Convert in one batch.** Pipe all measurements, across all grids, into a single call:
+3. **Measure each frame against its grid.** Match each design frame to the grid whose `mockupWidth` equals the frame width. Collect its horizontal measurements: widths, offsets, padding and column gaps. Vertical spacing and font sizes skip the CLI: their class size is px ÷ `spacing` (`mt-24`, `text-10` at `spacing` `1`).
+4. **Convert in one batch.** Pipe all horizontal measurements, across all grids, into a single call:
 
    ```bash
-   echo '[{"pixels":330,"columns":12,"mockupWidth":1440,"gutter":20,"margin":60,"spacing":4}, {"pixels":18,"spacing":4,"grid":false}, …]' | bunx @numbered/tailwind-fluid-layout-system --batch
+   echo '[{"pixels":330,"columns":12,"mockupWidth":1440,"gutter":20,"margin":60,"spacing":1}, …]' | bunx @numbered/tailwind-fluid-layout-system --batch
    ```
-5. **Write the classes.** Keep each `className`'s size and swap its utility for the property you measured: `span-w-4` as a left offset → `span-ml-4`, `gap-6` as a top margin → `mt-6`. A font size is the project's `text-*` theme token whose value equals the `rem` field. Padding or offset equal to the grid's `margin` is `margin-px-1` / `margin-ml-1`. Classes for the `mobile` grid (required, no `screen`) are unprefixed; other grids get their `screen` prefix (`lg:span-w-8`), skipped when the class equals the one from the next smaller grid.
+5. **Write the classes.** Keep each `className`'s size and swap its utility for the property you measured: `span-w-4` as a left offset → `span-ml-4`, off-grid `gap-40` as left padding → `pl-40`. Padding or offset equal to the grid's `margin` is `margin-px-1` / `margin-ml-1`. Classes for the `mobile` grid (required, no `screen`) are unprefixed; other grids get their `screen` prefix (`lg:span-w-8`), skipped when the class equals the one from the next smaller grid.
 
-Done when every measurement on every frame is a class from the CLI.
+Done when every horizontal measurement on every frame is a class from the CLI.
 
 ## Reference
 
