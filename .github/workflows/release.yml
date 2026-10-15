@@ -50,8 +50,8 @@ jobs:
       - name: Bump the plugin on the website
         working-directory: landing
         run: |
-          # A fresh publish takes a moment to reach the registry: retry for up to 5 minutes.
-          until bun add "@numbered/tailwind-fluid-layout-system@^${GITHUB_REF_NAME#v}"; do
+          # A fresh publish takes a moment to reach the registry: retry for up to 5 minutes, skipping bun's manifest cache so retries see it.
+          until bun add --no-cache "@numbered/tailwind-fluid-layout-system@^${GITHUB_REF_NAME#v}"; do
             (( ++tries < 30 )) || exit 1
             sleep 10
           done
